@@ -57,7 +57,7 @@ data$t = data$t / 1000; head(data, 10); range(data$t)
 
 
 library(ggplot2); source(getwd())
-ga <- ggplot(data = datos) +
+ga <- ggplot(data = data) +
   geom_point(aes(x = t, y = ax, colour = "ax")) + 
   geom_point(aes(x = t, y = ay, colour = "ay")) +
   geom_point(aes(x = t, y = az, colour = "az")) +

@@ -33,6 +33,6 @@ co2.comun; at.comun; length(co2.comun) == length(at.comun)
 
 correlatio <- data.frame(Y = Y.comunes, CO2 = co2.comun, AT = at.comun);
 rm(Y.comunes, co2.comun, at.comun) #borra variables de la memoria
-
+  
 head(correlatio)
 
