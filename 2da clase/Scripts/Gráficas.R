@@ -13,17 +13,11 @@ library(xtable)
 library(IRdisplay)
 library(repr)
 
-#library con TeX()
-install.packages('latex2exp')
+# #library con TeX()
 library("latex2exp")
 
-#library para el ajuste de PDF y 
-install.packages("fitdistrplus")
+#library para el PDF y ajuste medio
 library("fitdistrplus")
-# Loading required package: MASS
-# Loading required package: survival
-install.packages("MASS")
-install.packages("survival")
 library(MASS)
 library(survival)
 
@@ -55,8 +49,10 @@ fig(width = 24, heigth = 12)
 # en las abcisas variable partida
 # en el vertical la frencuencia abosluta o aparición
 datos <- read.csv(file = "00.tsv", sep = "\t", header = F)
-datos <- datos[ , c(-1, -2, -6)]
+datos <- datos[ , c(-1, -2, -6)] # en este punto sacamos el tiempo
 colnames(datos) <- c("gx","gy","gz")
+
+
 
 # calculamos g
 datos$g <- sqrt(datos$gx^2 + datos$gy^2 + datos$gz^2); head(datos, 3)
@@ -167,22 +163,23 @@ lines(density(datos$g), col = "Deepskyblue1", lwd = 3) #gráfica del KDE
 
 #se le agrega una leyenda a la gráfica para que sea más facil de leer
 par(mar = c(10,10,5,0), mgp = c(6,2,0))
-hist(probability =  T,datos$g, breaks = nclass.FD(datos$g), col = "Deepskyblue4",
+hist(probability =  T,datos$g, breaks = nclass.FD(datos$g), col = "aquamarine2", #deepplue to aqua marine
      main = "Medidas de g con acelerómetro",
      xlab = expression(g(m/s^2)), 
+     ylab = "Densidad",
      cex.axis = 2, cex.lab = 3, cex.main = 3)
 #abline hace líneas rectas (buscar en la ayuda si es necesario)
-abline(v = mm.g, col = "Red3", lwd = 3)  #lwd = grosor de la línea
+abline(v = mm.g, col = "chocolate", lwd = 3)  #lwd = grosor de la línea
 
 #arrows para la sd
 arrows(x0 = (mm.g-seq(1,3,1)*s.g), x1 = (mm.g+seq(1,3,1)*s.g),
        y0 = c(25,5,1), y1 = c(25,5,1),
-       lwd = 3, col = "yellow3",
+       lwd = 3, col = "coral",
        angle = 90,length = 0.1,code = 3,
 )
 
 #texto media muestral
-text(x = 9.89, y = 45, labels = TeX("$\\bar{g}$"), col = "Red3", cex = 3)
+text(x = 9.89, y = 45, labels = TeX("$\\bar{g}$"), col = colors()[sample(1 : length(colors()), 1)], cex = 3)
 
 
 #gráficos líneas
@@ -192,5 +189,8 @@ lines( x = x, y = dnorm(x = x, mean = aju$estimate[1], sd = aju$estimate[2]), co
 lines(density(datos$g), col = "Deepskyblue1" ,lwd = 4) #gráfica del KDE
 
 #leyenda
-legend(x = 9.853, y = 52.5, legend=c("Ajuste Distribución Normal \n (Máx. Likelihood)", "Kernel Density Estimate"),bg = NA,box.lwd = 0,
+legend(x = 9.86, y = 52.5, legend=c("Ajuste Distribución Normal \n (Máx. Likelihood)", "Kernel Density Estimate"),bg = NA,box.lwd = 0,
        col=c("red3", "Deepskyblue1"), lty=c(1,1), lwd = 4,cex= 2, seg.len = 0.75)
+
+
+#trabajando con datos$gx
