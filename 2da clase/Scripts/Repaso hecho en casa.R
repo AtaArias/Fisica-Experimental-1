@@ -1,11 +1,11 @@
 rm(list = setdiff(ls(), lsf.str()));
 rm(list=lsf.str());
 cat("\014")
-
-install.packages("xtable")
-install.packages("IRdisplay")
-install.packages("repr")
-install.packages("ggplot2")
+# Ya están instalados
+# install.packages("xtable")
+# install.packages("IRdisplay")
+# install.packages("repr")
+# install.packages("ggplot2")
 
 #librerías
 suppressMessages(library("crayon")); suppressMessages(library("ggplot2"));
@@ -13,6 +13,7 @@ suppressMessages(library("gridExtra"));suppressMessages(library("latex2exp"))
 library(xtable)
 library(IRdisplay)
 library(repr)
+library(latex2exp)
 library(ggplot2)
 
 #opciones de ploteo ggplot2
@@ -50,28 +51,27 @@ head(datos, 3); dim(datos)
 # limpiamos los datos. c isn't for colum, is for concatenar
 datos <- datos[ , c(-1,-6)]; head(datos, 3)
 
-datos$ax = sqrt(datos$ax^2 + datos$ay^2 + datos$az^2)
+colnames(datos) <- c("t", "ax", "ay", "az")
+
+datos$g = sqrt(datos$ax^2 + datos$ay^2 + datos$az^2)
 head(datos, 3)
-
-datos = datos[ , c(-2,-3,-4)]
-
-colnames(datos) <- c("t" , "g")
 
 # Tx - T_0, easier to use
 datos$t <- datos$t - datos$t[1]; head(datos, 2); range(datos$t)
 
 # no se que hace esto che, lets decifer it
-# library(ggplot2); source(getwd())
-# ga <- ggplot(data = datos) +
-#   geom_point(aes(x = t, y = ax, colour = "ax")) + 
-#   geom_point(aes(x = t, y = ay, colour = "ay")) +
-#   geom_point(aes(x = t, y = az, colour = "az")) +
-#   ylab(TeX("$a \\; (m\\, / \\,s^2)$")) + xlab("t (s)") + 
-#   scale_colour_manual(values = c("ax" = "green4", "ay" = "red4", "az" = "Deepskyblue4" ),name = NULL) +
-#   temajuan3  + theme(legend.position = c(0.2,0.4), legend.direction = "horizontal")
-# fig(width = 24,heigth = 16); show(ga)
+library(ggplot2); source(getwd())
+ga <- ggplot(data = datos) +
+  geom_point(aes(x = t, y = ax, colour = "ax")) +
+  geom_point(aes(x = t, y = ay, colour = "ay")) +
+  geom_point(aes(x = t, y = az, colour = "az")) +
+  ylab(TeX("$a \\; (m\\, / \\,s^2)$")) + xlab("t (s)") +
+  scale_colour_manual(values = c("ax" = "green4", "ay" = "red4", "az" = "Deepskyblue4" ),name = NULL) +
+  temajuan3  + theme(legend.position = c(0.2,0.4), legend.direction = "horizontal")
+fig(width = 24,heigth = 16); show(ga)
 
 # No me funciona lo de juan, probemos con plot
+#    Creo que lo resolví, habia que instalar la librería de latex2exp
 plot(x = datos$t, y = datos$g)
 
 
