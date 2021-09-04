@@ -66,7 +66,7 @@ aju <- fitdistrplus::fitdist(data = datos$gx, distr = "norm")
 
 # gráficos de líneas
 x <- seq(min(datos$gx), max(datos$gx), length.out = 1000) # distribución normal
-lines( x = x, y = dnorm(x = x, mean = aju$estimate[1], sd = aju$estimate[2]), col = "red3", lwd = 3, type = "l", lty = 3)
+lines( x = x, y = dnorm(x = x, mean = aju$estimate[1], sd = aju$estimate[2]), col = "red3", lwd = 3, type = "l", lty = 1)
 
 
 lines(density(datos$gx), col = "Deepskyblue1", lwd = 3) #gráfica del KDE
