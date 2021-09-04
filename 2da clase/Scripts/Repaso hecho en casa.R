@@ -56,11 +56,11 @@ colnames(datos) <- c("t", "ax", "ay", "az")
 datos$g = sqrt(datos$ax^2 + datos$ay^2 + datos$az^2)
 head(datos, 3)
 
-# Tx - T_0, easier to use
-datos$t <- datos$t - datos$t[1]; head(datos, 2); range(datos$t)
+# Tx - T_0/ 1000 miliseconds to seconds, easier to use
+datos$t <- (datos$t - datos$t[1]) / 1000; head(datos, 2); range(datos$t)
 
 # no se que hace esto che, lets decifer it
-library(ggplot2); source(getwd())
+library(ggplot2); source(getwd())# source me tiraba error
 ga <- ggplot(data = datos) +
   geom_point(aes(x = t, y = ax, colour = "ax")) +
   geom_point(aes(x = t, y = ay, colour = "ay")) +
@@ -73,5 +73,4 @@ fig(width = 24,heigth = 16); show(ga)
 # No me funciona lo de juan, probemos con plot
 #    Creo que lo resolví, habia que instalar la librería de latex2exp
 plot(x = datos$t, y = datos$g)
-
 
