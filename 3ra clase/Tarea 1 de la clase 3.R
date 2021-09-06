@@ -12,7 +12,8 @@ library(xtable)
 library(IRdisplay)
 library(repr)
 
-library(ggplot2)+geom_density(aes(y=0.045*..count..), colour="black", adjust=4)
+
+library(ggplot2)
 
 temajuan3 <- theme(
   legend.title = element_text(size = 14),
@@ -37,8 +38,7 @@ fig <- function(width, heigth){
 }
 
 fig(width = 24, heigth = 12)
-# setwd("ubicación del archivo")
-
+setwd("C:/Users/atahu/OneDrive/Escritorio/Universidad/1er año/2do cuatrimestre/Física experimental I/Programación/githum/física experimental 1/Fisica-Experimental-1/2da clase")
 
 datos <- read.csv(file = "00.tsv", sep = "\t", header = F); datos <- datos[, c(-1,-2,-6)];
 colnames(datos) <- c("gx","gy", "gz"); head(datos, 3)
@@ -52,6 +52,7 @@ mm.g <- mean(datos$gx); mm.g
 #standar deviation
 s.g <- sd(datos$gx);
 
+pdf("MedidasDeG169.pdf", width = 16, height = 9)
 
 par(mar = c(10,10,5,0), mgp = c(6,2,0))
 
@@ -92,5 +93,5 @@ text(x = (mm.g+0.0005), y = c(25,-4,-14) + 20,
 
 legend(x = -0.13, y = 90, legend=c("Ajuste Distribución Normal \n (Máx. Likelihood)", "Kernel Density Estimate"),bg = NA,box.lwd = 0,
        col=c("red3", "Deepskyblue1"), lty=c(1,1), lwd = 4,cex= 2, seg.len = 0.75)
-
+dev.off()
 

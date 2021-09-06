@@ -46,6 +46,7 @@ plot(x = cultivos$Ano, y = cultivos$Superficie)
 
 plot(x = cultivos$Ano, y = cultivos$Superficie, pch = seq(1,25,1), cex = 1)
 
+pdf("SfCultivos169.pdf", width= 16, height = 9)
 #dejamos dos símbolos, para soja y maíz con un truquito, agregamos detalles
 fig(24,14);plot(x = cultivos$Ano, y = cultivos$Superficie,
                 pch = c(17,16)[as.integer(cultivos$Cultivo == "Soja") + 1], #símbolos triángulo y círculo PLOT CHARACTER
@@ -65,7 +66,7 @@ legend(x = 1960, y = 20, #dónde va la leyenda en unidades del plot
        bty = "n",
        bg = NA, box.lwd = 0 #sin color de fondo y sin "caja"
 )
-
+dev.off()
 head(cultivos, 3)
 print(cultivos)
 
@@ -91,7 +92,6 @@ print("Crece la soja, decrece el maíz")
 
 
 #graficamos el ajuste encima de los datos
-
 #sólo ploteo entre el 2002 y el 2014
 plot(x = cultivos$Ano, y = cultivos$Superficie, pch = c(17,16)[as.integer(cultivos$Cultivo == "Soja") + 1],
      cex = 1, main = "Superficie Cultiva de Soja y Maíz en la Argentina 1960-2014 (FAO)",xlab = "Año", ylab = "Superficie (Millones de ha)",
@@ -116,6 +116,8 @@ legend(x = 2001.5, y = 20.5, #dónde va la leyenda en unidades del plot
 # Cambie el rango de la Superficie, usando ylim(0,54). 54 Mha es la nueva superficie de la zona cultivable, dados desmontes y quemazones.
 # Cambie las líneas de los ajustes por líneas enteras, con dos colores diferentes. Ajuste los parámetros de la leyenda.
 
+pdf("DispCultivos169.pdf", width = 16, height = 9)
+
 plot(x = cultivos$Ano, y = cultivos$Superficie, pch = c(16,17)[as.integer(cultivos$Cultivo == "Soja") + 1],
      cex = 1, main = "Superficie de cultivo. Soja vs Maiz. Arg 1996-2015", xlab = "Año", ylab = "Superficio (Millones de ha",
      cex.lab = 1.4, cex.main = 1.5, cex.axis = 1.2, xlim = c(1996, 2015), ylim = c(0, 54))
@@ -133,3 +135,4 @@ legend(x = 1997, y = 55, #dónde va la leyenda en unidades del plot
        cex = 1,
        bty = "n", bg = NA,box.lwd = 0 #sin color de fondo y sin "caja"
 )
+dev.off()
