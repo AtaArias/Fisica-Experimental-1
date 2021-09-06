@@ -75,6 +75,12 @@ arrows(x0 = a$Atrig, x1 = a$Atrig,
 
 # ajuste linear
 
+
+#tarea 4
+#pdf(nombre, width, height) ...  dev.off()
+# 
+pdf("BarrasError169.pdf", width = 16, height = 9)
+
 ajuste <- lm(a$Aacel ~ a$Atrig)
 
 plot(x = a$Atrig, y =  a$Aacel, pch = 16,  cex = 1.5,main = "Calibración Ángulos",xlab = "Ángulo Trigonometría (°)", ylab = "Ángulo Acel. (°)",
@@ -101,6 +107,9 @@ legend(x = 0, y = 80, #dónde va la leyenda en unidades del plot
        bty = "n",
        bg = NA,box.lwd = 0 #sin color de fondo y sin "caja"
 )
+ 
+dev.off()
+
 
 summary.lm(ajuste)
 
@@ -125,11 +134,14 @@ ord.origen; pendiente #imprime parámetros de ajuste
 # Las rectas no coinciden porque a está en otra escala no log
 # pasamos de la recta a la exponencial de la cual se tomó la recta y los puntos
 
+pdf("ExpEscalaLog169.pdf", width = 16, height = 9)
+
 # graficamos un exp
 plot(x,y,log = "y")
 lines(x = x, y = exp(ord.origen+pendiente*x), col = "red")
 #ahora sí funciona, porque graficamos una exponencial
 
+dev.off()
 # 2da forma
 
 plot(x, log(y))
@@ -145,7 +157,8 @@ axis(2,at=log(labels),labels=labels) #vean que at= log(labels) indica que ponga 
 abline(a, col = "Deepskyblue4", lwd = 2) #podemos, claro, dibujar la recta, porque la escala
 #del gráfico no está transformada.
 
-# escalas log - log
+
+### escalas log - log
 # tenemos la ecuación y = [x / C]^(1/c) + 5
 
 y <- (x/2)^{1/2} + 5 # acá pusimos C = 2, pero podría ser cualquier valor
@@ -166,11 +179,13 @@ ajuste <- lm(log(y.prima) ~ log(x)); pendiente <- ajuste$coefficients[2];
 # lo anterior tira error porque dividmos por 0
 # ahora lo hacemos de nuevo tomando solo valores mayores a 0
 ajuste <- lm(log(y.prima[x>0]) ~ log(x[x>0]));ord.origen <- ajuste$coefficients[1] ;pendiente <- ajuste$coefficients[2];
+
+pdf("logs19.pdf", width = 16, height = 9)
+
 plot(log(x), log(y.prima))
-
-
 abline(ajuste, col = "red")
 
+dev.off()
 
 # y = (x/C)^1/c +5  | y' = y - 5 = (x/C)^1/c   log(y') = log(y - 5) = 1/c log(x/C) = 1/c (log(x) - log(C))
 # Tenemos las ecuación de y' sacamos log a ambos lados para llegar a la siguiente expresión
@@ -183,3 +198,34 @@ C = exp(ord.origen * (-c))
 
 print(paste("El c calculado es: ", toString(c)," el c conseguido al azar es: ", toString(e.azar)," su diferencia es: ", toString(c - e.azar)))
 print(paste("El C calculado es: ", toString(C)," el C conseguido al azar es: ", toString(C.azar)," su diferencia es: ", toString(C - C.azar)))
+
+
+# Tarea 4 importar como pdf
+# Guardar gráficos en el disco
+#1ro indicar directorio de trabajo
+
+# Ejemplo en pdf
+pdf("Ejemplo.pdf",width=7,height=5) #acá va el tamaño, que puede ser útil
+
+#plot
+x=rnorm(1000)
+y=rnorm(1000)
+plot(x,y, type = "l", lty= 1,lwd=1,col="Deepskyblue4")
+lines(y,x,lty=2,lwd = 0.25,col="green4")
+#endplot
+
+dev.off()
+
+#Ejemplo en png
+png("Ejemplo.png",units = "cm", width = 10, height = 10, res = 200) #acá va el tamaño, que puede ser útil
+
+#plot
+x=rnorm(1000)
+y=rnorm(1000)
+plot(x,y, type = "l", lty= 1,lwd=1,col="Deepskyblue4")
+lines(y,x,lty=2,lwd = 0.25,col="green4")
+#endplot
+
+dev.off()
+
+# Guarde los gráficos que realizó en este archivo. archivos que tengan igual ancho que alto, y en relación 16:9
