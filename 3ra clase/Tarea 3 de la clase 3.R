@@ -17,6 +17,7 @@ library(repr)
 library(ggplot2)
 library(latex2exp)
 library(fitdistrplus)
+
 #opciones de ploteo ggplot2
 temajuan3 <- theme(
   legend.title = element_text(size = 14),
