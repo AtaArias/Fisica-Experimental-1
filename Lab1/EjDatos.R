@@ -7,7 +7,7 @@ library(latex2exp)
 
 # Cargamos los datos del periodo en p
 pers <- read.csv( file = "per_Atahualpa", header = F, sep = ",", skip = 2)
-pers$V4 -> pibrary
+pers$V4 -> p
 plot(p)
 # limpiamos
 p.limpio <- p[p < 2.4 & p >1.6]

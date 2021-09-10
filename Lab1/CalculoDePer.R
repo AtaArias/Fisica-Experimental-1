@@ -6,5 +6,5 @@ tiempo_total
 nuestro_tiempo = sum(tiempos[seq(2, length(l), 2)])
 nuestro_tiempo
 
-iara = 2*pi*sqrt(2.55/9.8)
-iara *200 / 60
+iara = 2*pi*sqrt(1.05/9.8)
+iara
