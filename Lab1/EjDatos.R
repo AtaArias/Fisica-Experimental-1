@@ -1,33 +1,28 @@
-pers <- read.csv( file = "per_Iara.txt", header = F, sep = ",")
-pers$V4 -> p
+# librerías
+library(ggplot2)
+library(fitdistrplus)
+library(repr)
+library(xtable)
+library(latex2exp)
+
+# Cargamos los datos del periodo en p
+pers <- read.csv( file = "per_Atahualpa", header = F, sep = ",", skip = 2)
+pers$V4 -> pibrary
 plot(p)
-#limpiamos
-p.limpio <- p.limpio[p.limpio < 2]
-plot(p.limpio)
-mean(p.limpio)
-# > plot(p)
-# > p.limpio <- p[p < 3]
-# > plot(p.limpio)
-# > p.limpio <- p.limpio[p.limpio < 2.4 & p.limpio > 1.6]
-# > mean(p.limpio)
-# [1] 2.058028
-# > plot(p.limpio)
-# > iara *200 / 60
-# Error: object 'iara' not found
-# > l <- seq(0.3, 2.25, 0.15)
-# > tao <- 2*pi*sqrt(l/9.8)
-# > tiempos <- tao * 200 / 60
-# > tiempo_total = sum(tiempos)
-# > tiempo_total
-# [1] 102.2703
-# > nuestro_tiempo = sum(tiempos[seq(2, length(l), 2)])
-# > nuestro_tiempo
-# [1] 52.88269
-# > iara = 2*pi*sqrt(2.55/9.8)
-# > iara *200 / 60
-# [1] 10.68355
-# > 
-#   > tao[6]
-# [1] 2.056655
-# > pers$V4 -> p
-# > 
+# limpiamos
+p.limpio <- p[p < 2.4 & p >1.6]
+par( mar = c(6.1, 5.1, 5.1, 3.1))
+plot(p.limpio,  xlab = "Número de medida", ylab = "Periodo", main = "Distribución de las mediciones de los periodos",
+     pch = 16, cex.lab = 1.5, cex.axis = 1.5, cex.main = 2)
+mean = mean(p.limpio)
+
+# Valor medio
+abline(h = mean, col = "blue", lwd = 2)
+text(x =10, y = 2.1, label = "mean", col = "blue", cex = 1.3)
+
+#####
+# Histograma
+hist(p.limpio, breaks = nclass.FD(p.limpio), col = "magenta",
+     main = "Histograma de los periodos del péndulo",
+     xlab = "Periodo", ylab = "Frecuencia",
+     cex.axis = 1.3, cex.lab = 1.5, cex.main = 2)
