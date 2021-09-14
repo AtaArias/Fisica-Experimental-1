@@ -91,7 +91,7 @@ lines( x = x, y = dnorm(x = x, mean = aju$estimate[1], sd = aju$estimate[2]), co
 lines(density(m.limpios), col = col.kernel, lwd = 3)
 
 # leyenda
-legend(x = 1.75, y = 4, 
+legend(x = 1.7, y = 4.5, 
        legend = c("Distribución normal", "Kernel Density Estimate"), 
        bg = NA, box.lwd = 0, box.lty = 0,
        col = c(col.normal, col.kernel), 
@@ -105,3 +105,4 @@ text(2.025, y = c(3,1.5,0.4),
      labels = c(TeX(r'($\bar{\tau} \\pm  s$)'), TeX(r'($\bar{\tau} \\pm  2s$)'), TeX(r'($\bar{\tau} \\pm  3s$)')),
      cex = 1.5, col = col.sd)
 text(x = mn - 0.025, y = 4, labels = "SEM", col = col.SEM, cex = 1.5)
+
