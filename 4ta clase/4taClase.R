@@ -6,6 +6,9 @@ library(repr)
 library(xtable)
 library(paletteer)
 
+setwd("C:/Users/atahu/OneDrive/Escritorio/Universidad/1er año/2do cuatrimestre/Física experimental I/Programación/githum/física experimental 1/Lab1")
+
+
 #colores a usar
 colores = paletteer_d("awtools::ppalette")
 col.hist = colores[2]; col.tau = colores[8]; col.sd = colores[1]
@@ -47,6 +50,7 @@ arrows(x0 = 25, y0 = mn - SEM, x1 = 25, y1 = mn + SEM, # SEM
        lwd = 3, col = col.SEM, angle = 90, length = 0.1, code = 3)
 abline(h = mn + c(-SEM, SEM), col = col.SEM, lwd = 3)
 
+
 # Texto
 text(label = TeX(r'($\bar{ \tau }$)'), x = 5, y = mn +0.025, col = col.tau, cex = 2) #valor medio
 text(label = "Standar \n deviation", x = 100, y = 1.9, col = col.sd, cex = 1.3)
@@ -87,8 +91,12 @@ lines( x = x, y = dnorm(x = x, mean = aju$estimate[1], sd = aju$estimate[2]), co
 lines(density(m.limpios), col = col.kernel, lwd = 3)
 
 # leyenda
-legend(x = 1.75, y = 4, legend = c("Distribución normal", "Kernel Density Estimate"), bg = NA, box.lwd = 0, box.lty = 0,
-                                   col = c(col.normal, col.kernel), lty = c(5,1), lwd = 4, cex = 1.5, seg.len = 2)
+legend(x = 1.75, y = 4, 
+       legend = c("Distribución normal", "Kernel Density Estimate"), 
+       bg = NA, box.lwd = 0, box.lty = 0,
+       col = c(col.normal, col.kernel), 
+       lty = c(5,1), lwd = 4, 
+       cex = 1.5, seg.len = 2)
 
 
 #texto
