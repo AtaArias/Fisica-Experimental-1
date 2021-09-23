@@ -79,7 +79,12 @@ Ord.origen = ajuste.pendiente.ord$coefficients[1]
 Pendiente = ajuste.pendiente.ord$coefficients[2]
 abline(a = Ord.origen, b = Pendiente, col = col.l.libre, lwd = 2, lty = 1)
 
+<<<<<<< HEAD
 legend(x = 0.6, y =2.8, 
        legend = c("g RAGA", "ajuste lineal con corte en origen", "ajuste lineal sin restricción"), 
+=======
+legend(x = 0, y =3, 
+       legend = c("Raga", "lm con corte en origen", "lm sin restricción"), 
+>>>>>>> 19075407ac4207694646789e2e2065c0b4073208
        box.lty = 0, bty = "n", col = c(col.l.manual, col.l.origen, col.l.libre),
        lwd = 4, lty = c(1,1,1), seg.len = 3)
