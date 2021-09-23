@@ -1,5 +1,4 @@
 # leemos los datos
-
 # setwd(paste(getwd(), "Lab2", sep = "/"))
 
 horizontal = read.csv("horizontal prueba.tsv", header = F, sep = "\t")
