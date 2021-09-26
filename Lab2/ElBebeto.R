@@ -33,17 +33,13 @@ for(file in files){
   # filtramos los datos
   leyendo <- leyendo[leyendo$g < mediana + 0.04 & leyendo$g > mediana - 0.04,]
   
-  #  
   #los cortamos en 1973
   leyendo <- leyendo[1:2000,]
 
-  
   # insertamos la media
   leyendo$media <- mean(leyendo$g)
   
   acel <- rbind(acel, leyendo)
-  
-  paste(!!leyendo$name)
 }
 
 # Distribución de los datos de gravedad
