@@ -94,13 +94,23 @@ for (i in 1:8){
 colnames(angulos) <- c("medida", "acelAng", "delta Acel")
 
 Trigs <- read.csv("trigDatos.csv")
-angulos$trigAng <- acos(Trigs$adyacente / Trigs$Hip) * (180 / pi)
-plot(y = angulos$acelAng, x = angulos$trigAng, pch = 20,
+cosen <- Trigs$adyacente / Trigs$Hip
+angulos$trigAng <- acos(cosen) * (180 / pi)
+angulos$"delta Trig" <- (( 1 / (sqrt( 1 - cosen ^ 2) * Trigs$Hip)) * Trigs$d.med) * (1 + cosen)
+angulos$"delta Trig" <- angulos$`delta Trig` * 180 / pi
+
+plot(x = angulos$acelAng, y = angulos$trigAng, pch = 20,
      col = colores[angulos$medida / 10])
 abline(a = 0, b = 1, col = "red")
-arrows(x0 = angulos$medida, x1 = angulos$medida, 
-       y0 = angulos$acelAng + angulos$`delta Acel`, 
-       y1 = angulos$acelAng - angulos$`delta Acel`,
-       col = "yellow", length = 0)
-ajuste <- lm(angulos$acelAng ~ angulos$trigAng)
-abline(ajuste, lwd = 2, col = "yellow")
+arrows(x0 = angulos$acelAng, x1 = angulos$acelAng, 
+       y0 = angulos$trigAng + angulos$`delta Trig`, 
+       y1 = angulos$trigAng - angulos$`delta Trig`,
+       col = "yellow", length = 0, lwd = 1)
+ajuste <- lm(angulos$trigAng ~ angulos$acelAng)
+abline(ajuste, lwd = 2, col = "yellow3")
+
+# diferencias en la ordenada al origen es un error sitemático
+sis_error <- ajuste$coefficients[1]
+# diferencias en la pendiente es otra cosa
+pendiente <- ajuste$coefficients[2]
+
