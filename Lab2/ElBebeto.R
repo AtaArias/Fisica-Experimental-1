@@ -1,3 +1,4 @@
+#####
 # Librerías
 library(ggplot2)
 
@@ -10,6 +11,7 @@ colores <- paletteer::paletteer_d("ggsci::default_aaas")
 setwd(paste(getwd(), "Lab2", "DatosReal", sep = "/"))
 files <- list.files(pattern = ".tsv")
 
+#####
 # tidy-data
 acel <- data.frame(NULL)
 # se leen todos los datos, se limpian, genera una columna con el g, otra con la media de g y se inserta
@@ -41,7 +43,7 @@ for(file in files){
   
   acel <- rbind(acel, leyendo)
 }
-
+#####
 # Distribución de los datos de gravedad
 par(mar = c(6.1,5.1,5.1,3.1))
 plot(acel$g - acel$media,
@@ -57,6 +59,8 @@ for (i in 0:8){
          pch = 20, col = colores[i + 1], bty = "n")
 }
 
+#####
+# Cálculo de los ángulos
 # seleccionamos la primera medida, la horizontal
 angulos <- data.frame(NULL)
 horz <- acel[acel$name == 0,]
@@ -81,36 +85,115 @@ for (i in 1:8){
   # angulo a través del arcoseno
   coseno <- produc / (current$g * horz$g)
   ang <- acos(coseno) * 180 / pi
-  SEM <- sd(ang) / sqrt(length(ang))
-  plot(ang, main = paste(i * 10, " ángulo"), ylab = "ángulo (°)", xlab = "número de medida",
-        pch = 20, col = colores[current$name + 1],
-        cex.main = 2, cex.lab = 1.5, cex.axis = 1.5)
+  s.dev <- sd(ang)
+  SEM <- s.dev / sqrt(length(ang))
+  a.media <- mean(ang)
   
   # información sobre los angulos
-  datos <- c((i * 10), mean(ang), SEM)
+  datos <- c((i * 10), a.media, SEM)
   angulos <- rbind(angulos, datos)
 }
- 
 colnames(angulos) <- c("medida", "acelAng", "delta Acel")
 
+#####
+## graficamos aquellas mediciones con el menor y la mayor sd
+min.sd <- angulos[angulos$`delta Acel` == min(angulos$`delta Acel`),]$medida / 10
+max.sd <- angulos[angulos$`delta Acel` == max(angulos$`delta Acel`),]$medida / 10
+
+for(name in c(min.sd, max.sd)){
+  # seleccionamos los datos tita name
+  current <- acel[acel$name == name,]
+  
+  # producto punto
+  produc <- (horz$ax * current$ax)+(horz$ay * current$ay)+(horz$az * current$az)
+  
+  # angulo a través del arcoseno
+  coseno <- produc / (current$g * horz$g)
+  ang <- acos(coseno) * 180 / pi
+  s.dev <- sd(ang)
+  SEM <- s.dev / sqrt(length(ang))
+  a.media <- mean(ang)
+  
+  if (name == 8) {
+    tipo <- "maximo"
+  }
+  else
+    tipo <- "mínimo"
+  
+  # histograma de cada ángulo
+  hist(ang, breaks = nclass.FD(ang),
+       main = paste(name * 10, " ángulo, con sd", tipo), xlab = "ángulo (°)",
+       pch = 20, col = colores[5],
+       cex.main = 2, cex.lab = 1.5, cex.axis = 1.5)
+  
+  # valor medio del ángulo
+  abline(v = a.media, col = "red", lty = 1, lwd = 2)
+  text(x = a.media + 0.04, y = -4, label = "Media", pch = 1.5)
+  
+  # standard deviation
+  arrows(x0 = a.media + ((1:3) * s.dev), x1 = a.media - ((1:3) * s.dev),
+         y0 = c(150, 50, 10), y1 = c(150, 50, 10),
+         col = "yellow", lwd = 2,
+         angle = 90, length = 0.1, code = 3)
+  text(x = a.media + 0.04, y = c(200, 50, 10) + 5,
+       label = paste("Ang ±", (1:3), "sd", sep = ""), col = "yellow")
+  
+  # SEM
+  arrows(x0 = a.media - SEM, x1 = a.media + SEM, 
+         y0 = 100, y1 = 100, col = colores[2], lwd = 2, 
+         angle = 90, code = 3, length = 0.1)
+}
+
+#####
+# Curva de calibración y errores
 Trigs <- read.csv("trigDatos.csv")
 cosen <- Trigs$adyacente / Trigs$Hip
 angulos$trigAng <- acos(cosen) * (180 / pi)
 angulos$"delta Trig" <- (( 1 / (sqrt( 1 - cosen ^ 2) * Trigs$Hip)) * Trigs$d.med) * (1 + cosen)
 angulos$"delta Trig" <- angulos$`delta Trig` * 180 / pi
 
+## plot de calibración
 plot(x = angulos$acelAng, y = angulos$trigAng, pch = 20,
+     main = "Curva de calibración", xlab = "Ángulos con acelerómetro (°)", ylab = "Ángulos con trigonometría (°)",
+     cex.axis = 1.3, cex.lab = 1.3, cex.main = 2,
      col = colores[angulos$medida / 10])
-abline(a = 0, b = 1, col = "red")
+
+# curva perfecta
+abline(a = 0, b = 1, col = "red3")
+
+# errores
 arrows(x0 = angulos$acelAng, x1 = angulos$acelAng, 
        y0 = angulos$trigAng + angulos$`delta Trig`, 
        y1 = angulos$trigAng - angulos$`delta Trig`,
        col = "yellow", length = 0, lwd = 1)
+
+# ajuste lineal
 ajuste <- lm(angulos$trigAng ~ angulos$acelAng)
 abline(ajuste, lwd = 2, col = "yellow3")
+
+#leyenda
+legend(x = 20, y = 80, legend = c("y = x", "ajuste lineal"),
+       col = c("red3", "yellow"), lty = 1, lwd = 3, bty = "n",)
 
 # diferencias en la ordenada al origen es un error sitemático
 sis_error <- ajuste$coefficients[1]
 # diferencias en la pendiente es otra cosa
 pendiente <- ajuste$coefficients[2]
+# error de la pendiente
+
+# r squared
+r.sq <- summary(ajuste)$r.squared
+
+legend(x =35, y = 30, legend = c(
+                                  paste("ordenada al origen del ajuste: ", round(sis_error, 4)), 
+                                  paste("pendiente del ajuste: ", round(pendiente, 4)),
+                                  paste("R-squared: ", round(r.sq, 4))
+                                  ),
+       bty = "n", cex = 0.9
+       )
+
+print(paste(" R-cuadrado: ", round(r.sq, 4), sep = ""))
+print(paste("Error sistemático (ordenada al origen del ajuste) de: ", round(sis_error, 4), "°", sep = ""))
+print(paste("La pendiente del ajuste lineal es: ", round(pendiente, 4), sep = ""))
+
 
