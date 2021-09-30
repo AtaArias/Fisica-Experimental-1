@@ -63,7 +63,7 @@ for (i in 0:8){
 # Cálculo de los ángulos
 # seleccionamos la primera medida, la horizontal
 angulos <- data.frame(NULL)
-horz <- acel[acel$name == 0,]
+horz <- c(mean(acel[acel$name == 0,]$ax), mean(acel[acel$name == 0,]$ay), mean(acel[acel$name == 0,]$az), acel[acel$name == 0,]$media[1])
 for (i in 1:8){
   # seleccionamos los datos tita i
   current <- acel[acel$name == i,]
@@ -80,10 +80,10 @@ for (i in 1:8){
        cex = 1.5, col = "red")
   
   # producto punto
-  produc <- (horz$ax * current$ax)+(horz$ay * current$ay)+(horz$az * current$az)
+  produc <- (horz[1] * current$ax)+(horz[2] * current$ay)+(horz[3] * current$az)
   
   # angulo a través del arcoseno
-  coseno <- produc / (current$g * horz$g)
+  coseno <- produc / (current$g * horz[4])
   ang <- acos(coseno) * 180 / pi
   s.dev <- sd(ang)
   SEM <- s.dev / sqrt(length(ang))
@@ -105,10 +105,10 @@ for(name in c(min.sd, max.sd)){
   current <- acel[acel$name == name,]
   
   # producto punto
-  produc <- (horz$ax * current$ax)+(horz$ay * current$ay)+(horz$az * current$az)
+  produc <- (horz[1] * current$ax)+(horz[2] * current$ay)+(horz[3] * current$az)
   
   # angulo a través del arcoseno
-  coseno <- produc / (current$g * horz$g)
+  coseno <- produc / (current$g * horz[4])
   ang <- acos(coseno) * 180 / pi
   s.dev <- sd(ang)
   SEM <- s.dev / sqrt(length(ang))
@@ -121,7 +121,7 @@ for(name in c(min.sd, max.sd)){
     tipo <- "mínimo"
   
   # histograma de cada ángulo
-  hist(ang, breaks = nclass.FD(ang),
+  hist(ang, breaks = nclass.scott(ang),
        main = paste(name * 10, " ángulo, con sd", tipo), xlab = "ángulo (°)",
        pch = 20, col = colores[5],
        cex.main = 2, cex.lab = 1.5, cex.axis = 1.5)
@@ -135,13 +135,14 @@ for(name in c(min.sd, max.sd)){
          y0 = c(150, 50, 10), y1 = c(150, 50, 10),
          col = "yellow", lwd = 2,
          angle = 90, length = 0.1, code = 3)
-  text(x = a.media + 0.04, y = c(200, 50, 10) + 5,
+  text(x = a.media + 0.04, y = c(150, 50, 10) + 5,
        label = paste("Ang ±", (1:3), "sd", sep = ""), col = "yellow")
   
   # SEM
   arrows(x0 = a.media - SEM, x1 = a.media + SEM, 
          y0 = 100, y1 = 100, col = colores[2], lwd = 2, 
          angle = 90, code = 3, length = 0.1)
+  text(x =a.media +0.04, y = 100, col = colores[2], label = "SEM", pch = 1.5)
 }
 
 #####
@@ -153,8 +154,8 @@ angulos$"delta Trig" <- (( 1 / (sqrt( 1 - cosen ^ 2) * Trigs$Hip)) * Trigs$d.med
 angulos$"delta Trig" <- angulos$`delta Trig` * 180 / pi
 
 ## plot de calibración
-plot(x = angulos$acelAng, y = angulos$trigAng, pch = 20,
-     main = "Curva de calibración", xlab = "Ángulos con acelerómetro (°)", ylab = "Ángulos con trigonometría (°)",
+plot(y = angulos$acelAng, x = angulos$trigAng, pch = 20,
+     main = "Curva de calibración", ylab = "Ángulos con acelerómetro (°)", xlab = "Ángulos con trigonometría (°)",
      cex.axis = 1.3, cex.lab = 1.3, cex.main = 2,
      col = colores[angulos$medida / 10])
 
@@ -162,13 +163,13 @@ plot(x = angulos$acelAng, y = angulos$trigAng, pch = 20,
 abline(a = 0, b = 1, col = "red3")
 
 # errores
-arrows(x0 = angulos$acelAng, x1 = angulos$acelAng, 
-       y0 = angulos$trigAng + angulos$`delta Trig`, 
-       y1 = angulos$trigAng - angulos$`delta Trig`,
+arrows(x0 = angulos$trigAng, x1 = angulos$trigAng, 
+       y0 = angulos$acelAng + angulos$`delta Acel`, 
+       y1 = angulos$acelAng - angulos$`delta Acel`,
        col = "yellow", length = 0, lwd = 1)
 
 # ajuste lineal
-ajuste <- lm(angulos$trigAng ~ angulos$acelAng)
+ajuste <- lm(angulos$acelAng ~ angulos$trigAng)
 abline(ajuste, lwd = 2, col = "yellow3")
 
 #leyenda
