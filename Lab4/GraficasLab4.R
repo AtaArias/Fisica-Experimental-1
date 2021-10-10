@@ -12,7 +12,7 @@ library(ggplot2)
 bolas_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vTsyvdo2lU0sTbAhqoRNA8fIJaazMu0gCksWKBsCgQ-1snwm3A9SnpsbF4qQT04hdZBHQieKVbwP73-/pub?gid=0&single=true&output=csv"
 bolas <- read.csv(bolas_url, header = T, sep = ",")
 bolas <- bolas[bolas$r_cm < 3.5,]
-bolas <- bolas[bolas$Nombre == "",]
+bolas <- bolas[bolas$Nombre == "Atahualpa",]
 b_papel <- bolas[bolas$Papel == "papel",]
 b_alum <- bolas[bolas$Papel == "aluminio",]
 
@@ -51,6 +51,11 @@ abline(aju_plog, lwd = 2, col = "yellow")
 
 corte <- aju_plog$coefficients[1]
 pendiente <- aju_plog$coefficients[2]
+r.sq <- summary(aju_plog)$r.squared
+
+text(x = 0.5, y = 7, label = paste("corte al origen: ", round(corte, 4)) )
+text(x = 0.5, y = 6.8, label = paste("pendiente: ", round(pendiente, 4)))
+text(x = 0.5, y = 6.6, label = paste("rsquared: ", round(r.sq, 4)))
 
 densidad <- exp(corte) /  (4/3 * pi) # grafica log 
 densidades <- b_papel$m_mg / b_papel$r_cm^3 * 4/3 * pi # masa / vol
