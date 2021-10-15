@@ -6,6 +6,7 @@ gravedad <- function(set) {
 }
 
 limpieza <- function(set) {
+  set$g <- gravedad(set)
   set[set$g < median(set$g) + 0.1 & set$g > median(set$g) - 0.1,]
 }
 
@@ -22,8 +23,8 @@ angulos <- function(set1, set2){
 #####
 # constantes
 Raga <- 9.79316985
-n_hor <- "Jhorz.tsv"
-n_inc <- "aang.02.tsv"
+n_hor <- "hor.tsv"
+n_inc <- "AAng.tsv"
 n_plano1 <- "MPlanoAta.04.csv"
 #####
 # lectura de datos
@@ -36,39 +37,52 @@ hor <- hor[,c(-1,-2,-6)]; inc <- inc[,c(-1,-2,-6)]
 colnames(hor) <- colnames(inc) <- c("ax", "ay", "az")
 colnames(p1) <- c("t", "x", "v", "a")
 
-# se agrega el módulo
-hor$g <- gravedad(hor)
-inc$g <- gravedad(inc)
-
-# limpieza 
+# se agrega el módulo y se limpia
 hor <- limpieza(hor) 
 inc <- limpieza(inc)
 #####
 angs <- angulos(hor, inc)
-hist(angs)
-# x(t) = 1/2 sen(alpha) g * t²
-# y = 1/2 sen(alpha) g * x
-plot(p1$t, p1$x)
-m <- p1[p1$t < 2.5 & p1$t > 1.5,]
-plot(m$t, m$x)
+# hist(angs)
+# plot(p1$t, p1$x)
+# m <- p1[p1$t < 2.5 & p1$t > 1.5,]
+# plot(m$t, m$x)
+comienzo <- 2
 
-p2 <- p1[p1$t >1.75,]
+p2 <- p1[p1$t >comienzo,]
 t_0 <- p2$t[1]
 x_0 <- p2$x[1]
 p2$t <- p2$t - t_0
 p2$x <- p2$x - x_0
 
 plot(p2$t, p2$x)
-plot(p2$t**2, p2$x)
+lines(p2$t, x <- 1/2*Raga*sin((mean(angs)) * pi / 180) * p2$t^2, col = "Blue")
+lines(p2$t, x <- 1/2*Raga*sin((mean(ang_per))) * p2$t^2, col = "Yellow")
+lines(p2$t, x <- 1/2*Raga*sin((an_aju) * pi / 180) * p2$t^2, col = "Red")
 
-aju <- lm(p2$x ~ (p2$t**2))
-abline(aju)
+
+
+# ajuste linear
+
+plot(x = p2$t**2,y = p2$x, main = "Ajuste linear")
+x <- p2$t**2
+y <- p2$x
+aju <- lm(y ~ x)
 ord.origen <- aju$coefficients[1]
+ord.origen
 pendiente <- aju$coefficients[2]
-lines(x = p2$x, y = ord.origen + pendiente * (p2$t**2))
+abline(aju, col= "blue")
+# 
+ang_per <- asin((2 * p2[p2$t != 0,]$x)/ (Raga * p2[p2$t != 0,]$t**2))
+# hist(ang_per)
+# # y = posición x = t²
+# x = i/2 sen(alpha) g t²
+# alpha = asen(2 * pendiente / g)
+# pendiente = 1/2 sen(a) g
+# pendiente * 2 / g = sen(a)
+# arcoseno(pendiente * 2 / g) = a
+an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
+print(paste("Alpha seguń el ajuste lineal es: ", an_aju, "°", sep = ""))
 
-ang_per <- asin((2 * p2$x )/ (Raga * p2$t**2))
-hist(ang_per)
-print(mean(ang_per) * 180 / pi)
-# y = posición x = t²
-plot()
+print(paste("El angulo calculado es: ", mean(angs)))
+
+print(paste("El angulo tomado con la función es:",mean(ang_per) * 180 / pi))
