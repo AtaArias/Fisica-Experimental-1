@@ -1,4 +1,4 @@
-  setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
+setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   #####
   # funciones
   gravedad <- function(set) {
@@ -9,8 +9,8 @@
     set <- set[,c(-1,-2,-6)]
     colnames(set) <- c("ax", "ay", "az")
     set$g <- gravedad(set)
-    
-    set[set$g < median(set$g) + 0.1 & set$g > median(set$g) - 0.1,]
+   
+    set 
   }
   
   angulos <- function(set1, set2){
@@ -30,11 +30,11 @@
   #####
   # constantes
   Raga <- 9.79316985
-  n_hor <- "hor.tsv"
-  n_inc <- "AAng.tsv"
-  n_plano1 <- "MPlanoAta.04.csv"
-  n_fric <- "FricConstante.tsv"
-  n_pfric <- "MFric.csv"
+  n_hor <- "acelPiso01.tsv"
+  n_inc <- "planoInclinado01.tsv"
+  n_plano1 <- "MedidasAta01.csv"
+  n_fric <- "acelPiso0101.tsv"
+  n_pfric <- "SubiBaja01.csv"
   
   
   #####
@@ -54,25 +54,52 @@
   colnames(m_f) <- c("t", "x", "v", "a") -> colnames(p1)
   
   #####
+  # según la calibración
+  # ang_acel <- ang_real * 1.0283 + 0.8834
+  # ang_real <- (ang_acel - 0.8834) / 1.0283
   angs <- angulos(hor, inc)
-  # hist(angs)
+  ang_cal <- (mean(angs) - 0.8834) / 1.0283
+  hist(angs)
+  mean(angs)
+  angulo_cal
+  
+  op <- 4; hip <- 200 # cm
+  d.l <- 0.1 # cm
+  ang_trig <- asin(op/hip) * 180 / pi
+  ang_trig  
+  # error =  
+  
   # plot(p1$t, p1$x, main = " datos completos, pos vs tiempo")
   # plot(p1$t, p1$v, main = " datos compleots, vel vs tiempo")
   # m <- p1[p1$t < 2.5 & p1$t > 1.5,]
   # plot(m$t, m$x)
-  comienzo <- 1.75
-  final <- 6
+  # comienzo <- 1.75
+  # final <- 6
   
   p2 <- p1[p1$t >comienzo & p1$t < final,]
   t_0 <- p2$t[1]
   x_0 <- p2$x[1]
   p2$t <- p2$t - t_0
   p2$x <- p2$x - x_0
-    
+  
   plot(p2$t, p2$x, main = "pos vs tiempo limpios")
+  
+  # angulo perfecto
+  ang_per <- asin((2 * p2[p2$t != 0,]$x)/ (Raga * p2[p2$t != 0,]$t**2))
+  
+  # angulo con el ajuste lineal
+  x <- p2$t**2
+  y <- p2$x
+  aju <- lm(y ~ x)
+  ord.origen <- aju$coefficients[1]
+  pendiente <- aju$coefficients[2]
+  an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
+  
+  
+  
   lines(p2$t, x <- 1/2*  acel_plano(mean(angs)) * p2$t^2, col = "Blue")
-  lines(p2$t, x <- 1/2* (acel_plano(mean(angs)) - Frsubida) * p2$t^2, col = "Blue")
-  lines(p2$t, x <- 1/2* acel_bj * p2$t**2, col = "green")
+  # lines(p2$t, x <- 1/2* (acel_plano(mean(angs)) - Frsubida) * p2$t^2, col = "Blue")
+  # lines(p2$t, x <- 1/2* acel_bj * p2$t**2, col = "green")
   lines(p2$t, x <- 1/2* acel_plano(mean(ang_per) * 180 / pi) * p2$t^2, col = "Yellow")
   lines(p2$t, x <- 1/2* acel_plano(an_aju) * p2$t^2, col = "Red")
   
@@ -81,16 +108,9 @@
   # ajuste lineal
   
   plot(x = p2$t**2,y = p2$x, main = "Ajuste lineal")
-  x <- p2$t**2
-  y <- p2$x
-  aju <- lm(y ~ x)
-  ord.origen <- aju$coefficients[1]
-  ord.origen
-  pendiente <- aju$coefficients[2]
   abline(aju, col= "blue")
   
   abline(a= 0, b = 1/2 * ((((sin(mean(angs))* pi / 180))* Raga) - cteFr))
-  ang_per <- asin((2 * p2[p2$t != 0,]$x)/ (Raga * p2[p2$t != 0,]$t**2))
   # hist(ang_per)
   # # y = posición x = t²
   # x = i/2 sen(alpha) g t²
@@ -98,7 +118,6 @@
   # pendiente = 1/2 sen(a) g
   # pendiente * 2 / g = sen(a)
   # arcoseno(pendiente * 2 / g) = a
-  an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
   ##########################################
   # Fricción constante
@@ -157,10 +176,7 @@
   print(paste("fricción:", cteFr))
   
   Frsubida <- acel_sb - acel_plano(mean(angs))
-  Frsubida
   Frbajada <- acel_plano(mean(angs)) - acel_bj
-  Frbajada
-  cteFr
   (Frbajada + Frsubida) / 2
   
   ######################## Mensajes
