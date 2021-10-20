@@ -22,33 +22,35 @@ b_alum <- bolas[bolas$Papel == "aluminio",]
 
 #####
 # radio vs masa
-plot(y = b_papel$m_mg, x = b_papel$r_cm,
-     xlab = "Radio(cm)", ylab = "Masa(mg)",
+plot(x = b_papel$m_mg, y = b_papel$r_cm,
+     ylab = "Radio(cm)", xlab = "Masa(mg)",
      main = "Radio vs Masa de papel",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 
-aju_p <- lm(b_papel$m_mg ~ b_papel$r_cm)
+aju_p <- lm(b_papel$r_cm ~ b_papel$m_mg)
 abline(aju_p, lwd = 2, col = "yellow")
 
+
+
 # aluminio
-plot(y = b_alum$m_mg, x = b_alum$r_cm,
-     xlab = "Radio(cm)", ylab = "Masa(mg)",
+plot(x = b_alum$m_mg, y = b_alum$r_cm,
+     ylab = "Radio(cm)", xlab = "Masa(mg)",
      main = "Radio vs Masa de aluminio",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 
-aju_al <- lm(b_alum$m_mg ~ b_alum$r_cm)
+aju_al <- lm(b_alum$r_cm ~ b_alum$m_mg)
 abline(aju_al, lwd = 2, col = "blue")
 
 #####
 # log(radio) vs log(masa)
-plot(y = log(b_papel$m_mg), x = log(b_papel$r_cm),
-     xlab = "log(radio(cm))", ylab = "log(masa(mg))",
+plot(x = log(b_papel$m_mg), y = log(b_papel$r_cm),
+     ylab = "log(radio(cm))", xlab = "log(masa(mg))",
      main = "log-log Radio vs Masa de papel",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
-aju_plog <- lm(log(b_papel$m_mg) ~ log(b_papel$r_cm))
+aju_plog <- lm(log(b_papel$r_cm) ~ log(b_papel$m_mg) )
 abline(aju_plog, lwd = 2, col = "yellow")
 
 corte <- aju_plog$coefficients[1]
@@ -59,16 +61,16 @@ text(x = 0.5, y = 7, label = paste("corte al origen: ", round(corte, 4)) )
 text(x = 0.5, y = 6.8, label = paste("pendiente: ", round(pendiente, 4)))
 text(x = 0.5, y = 6.6, label = paste("rsquared: ", round(r.sq, 4)))
 
-p_lden <- exp(corte) /  (4/3 * pi) # grafica log 
+# p_lden <- 1 / pendiente  # grafica log 
 
 # aluminio
-plot(y = log(b_alum$m_mg), x = log(b_alum$r_cm),
-     xlab = "log(radio(cm))", ylab = "log(masa(mg))",
+plot(x = log(b_alum$m_mg), y = log(b_alum$r_cm),
+     ylab = "log(radio(cm))", xlab = "log(masa(mg))",
      main = "log-log Radio vs Masa de aluminio",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 
-aju_alog <- lm(log(b_alum$m_mg) ~ log(b_alum$r_cm))
+aju_alog <- lm(log(b_alum$r_cm) ~ log(b_alum$m_mg))
 abline(aju_alog, lwd = 2, col = "blue")
 
 al_corte <- aju_alog$coefficients[1]
@@ -78,34 +80,33 @@ al_rsq <- summary(aju_alog)$r.squared
 text(x = 0.3, y = 7.25, 
      label = paste("corte: ", round(al_corte, 4), "\npendiente: ", round(al_pend, 4), "\nrsquared: ", round(al_rsq, 4)))
 
-aju_alog
-al_lden <- (3 * exp(al_corte)) /  (4 * pi)
-
+# al_lden <- exp(-3 * al_corte) *3 / (4 * pi)
+# al_lden  
 #####
 # densidad vs radio
-plot(x = b_papel$densidad, y = b_papel$r_cm,
-     xlab = "Densidad(mg/cm^3)", ylab = "Radio(cm)",
+plot(y = b_papel$densidad, x = b_papel$r_cm,
+     ylab = "Densidad(mg/cm^3)", xlab = "Radio(cm)",
      main = "Densidad vs Radio de papel",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 
 # aluminio
-plot(x = b_alum$densidad, y = b_alum$r_cm,
-     xlab = "Densidad(mg/cm^3)", ylab = "Radio(cm)",
+plot(y = b_alum$densidad, x = b_alum$r_cm,
+     ylab = "Densidad(mg/cm^3)", xlab = "Radio(cm)",
      main = "Densidad vs Radio de aluminio",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 #####
 # densidad vs masa
-plot(x = b_papel$densidad, y = b_papel$m_mg,
-     xlab = "Densidad(mg/cm^3)", ylab = "Masa(mg)",
+plot(y = b_papel$densidad, x = b_papel$m_mg,
+     ylab = "Densidad(mg/cm^3)", xlab = "Masa(mg)",
      main = "Densidad vs Masa de papel",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
 
 #aluminio
-plot(x = b_alum$densidad, y = b_alum$m_mg,
-     xlab = "Densidad(mg/cm^3)", ylab = "Masa(mg)",
+plot(y = b_alum$densidad, x = b_alum$m_mg,
+     ylab = "Densidad(mg/cm^3)", xlab = "Masa(mg)",
      main = "Densidad vs Masa de aluminio",
      cex.main = 2, cex.lab = 1.5, cex.axis = 1.5,
      pch = 20)
@@ -128,4 +129,4 @@ for (nombre in nombres){
 
 print(paste("La densidad según el ajuste log-log de papel es:", p_lden,
             "La densidad a calculada es: ", mean(b_papel$densidad),
-            "La dimensión efectiva es: ", pendiente))
+            "La dimensión efectiva es: ", 1 / pendiente))
