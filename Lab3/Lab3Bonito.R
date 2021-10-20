@@ -1,5 +1,5 @@
   setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
-  
+  library(ggplot2)
   #####
   # funciones
   gravedad <- function(set) {
@@ -63,19 +63,14 @@
   # el angulo trig no toma en cuenta la inclinación de la mesa
   op <- 4; hip <- 200; seno <- op / hip; d.l <- 0.1 # cm
   ang_trig <- asin(seno) * 180 / pi
-  d.ang_trig <- (d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)
-  d.ang_trig <- d.ang_trig * 180 / pi
+  d.ang_trig <- ((d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)) * 180 / pi
   stdDev <- sd(angs)
   d.angs <- stdDev / length(angs)
-  d.angs
   
   #####
-  plot(pCom$t, pCom$x, main = " datos completos, pos vs tiempo")
   comienzo <- 1.85;  final <- 5
-  
   pRec <- pCom[pCom$t >comienzo & pCom$t < final,]
-  # t0 = 0, x0 = 0
-  pRec$t <- pRec$t - pRec$t[1]; pRec$x <- pRec$x - pRec$x[1]
+  pRec$t <- pRec$t - pRec$t[1]; pRec$x <- pRec$x - pRec$x[1] # t0 = 0, x0 = 0
   plot(pRec$t, pRec$x, main = "pos vs tiempo limpios")
   
   # angulo perfecto
@@ -91,7 +86,14 @@
   
   for (i in c(-1,0,1)){
   lines(pRec$t, x <- 1/2*  (acel_plano(ang_trig+i*d.ang_trig)) * pRec$t^2, col = "red")
+  lines(pRec$t, x <- 1/2*  ((acel_plano(ang_trig+i*d.ang_trig))-cteFr) * pRec$t^2, col = "red")
   }
+  
+  #ajuste cuadrático
+  aju_cu <- lm(pRec$x ~ poly(pRec$t, degre = 2, raw = T))
+  sa <- summary(aju_cu)
+  acel_aju <- 2 * sa$coefficients[3,2]
+  d.acel_aju <- 2 * sa$coefficients[3,1]
   
   lines(pRec$t, x <- 1/2* acel_plano(mean(ang_per)) * pRec$t^2, col = "Yellow")
   lines(pRec$t, x <- 1/2* acel_plano(an_aju) * pRec$t^2, col = "Red")
@@ -128,22 +130,15 @@
   f_ang <- angs
   
   # a la ida tiene la aceleración de la gravedad más la producida por la fricción
-  plot(m_f$t, m_f$x, main = "fricción pos vs t")
-  
-  plot(m_f$t, m_f$v, main = "friccion vel vs t")
-  
-  plot(m_f[m_f$a < 1 &  m_f$a > -1,]$t, m_f[m_f$a < 1 & m_f$a > -1,]$a, main = "friccion a vs t recortada")
+  plot(m_f$t, m_f$x, main = "Subida-Bajada", ylab = "x(m)", xlab = "t(s)")
   
   min <- min(m_f$x)
-  t_min <- m_f[m_f$x == min,]$t
-  t_min <- mean(t_min)
+  t_min <- m_f[m_f$x == min,]$t; t_min <- mean(t_min)
   
   subida <- m_f[m_f$t < t_min,]
   plot(subida$t, subida$x, main = "friccion pos vs t subida")
-  plot(subida$t, subida$v, main = "friccion vel vs t subida")
-  
   # limpieza subida
-  subida <- subida[subida$t > 1,]
+  subida <- subida[subida$t > 1.2 & subida$t < 4.5,]
   plot(subida$t, subida$v, main = "friccion vel vs t subida limpio")
   aju_sb <- lm(subida$v ~ subida$t)
   abline(aju_sb)
@@ -153,11 +148,7 @@
   
   bajada <- m_f[m_f$t > t_min,]
   plot(bajada$t, bajada$x, main = "fricción pos vs t bajada")
-  plot(bajada$t, bajada$v, main = "friccion vel vs t bajada")
-  
-  
   # limpieza bajada
-  # bajada <- bajada[bajada$t < 10 & bajada$t > 6,]
   plot(bajada$t, bajada$v, main = "friccion vel vs t bajada limpio")
   aju_bj <- lm(bajada$v ~ bajada$t)
   abline(aju_bj)
