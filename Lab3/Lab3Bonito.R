@@ -124,6 +124,36 @@
   abline(a = 0, b = 1/2 * acel_plano(mean(ang_per)), col = "yellow")
   abline(aju, col= "red")
   
+  ############################################
+  # acel vs sen(a)
+  # leo el archivo de internet
+  acels_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vShqcluBL3-Gxk9bj1ceO6cy-inHN5THAlMP75_fdK05gfAF3aDFDNLJXb2MqZA9bxPXj4Xir0Baqc2/pub?gid=0&single=true&output=csv"
+  acels <- read.csv(acels_url, header = T, sep = ",")
+  colnames(acels) <- c("acel", "ang", "d.ang", "d.acel", "nombre")
+  # calculo el seno de los angulos
+  acels$sin <- sin(acels$ang * pi / 180)
+  # ploteo acel vs seno y el ajuste lineal
+  plot(y = acels$acel, x = acels$sin)
+  abline(a = 0, b = Raga)
+  aju_todos <- lm(acels$acel ~ acels$sin)
+  abline(aju_todos)
+  arrows(x0 = acels$sin, x1 = acels$sin,
+         y0 = acels$acel - acels$d.acel, y1 = acels$acel + acels$d.acel,
+         length = 0, col ="blue")
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   #####
   ##########################################
   # Fricción constante
@@ -156,4 +186,6 @@
   text(x = 8, y = 0.15, label = paste("acel bajada:", acel_bj))
 
   cteFr <- (acel_sb - acel_bj) / 2
+  
+  
   
