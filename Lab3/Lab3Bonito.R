@@ -1,4 +1,5 @@
-setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
+  setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
+  
   #####
   # funciones
   gravedad <- function(set) {
@@ -33,7 +34,7 @@ setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   n_hor <- "acelPiso01.tsv"
   n_inc <- "planoInclinado01.tsv"
   n_plano1 <- "MedidasAta01.csv"
-  n_fric <- "acelPiso0101.tsv"
+  n_fric <- "acelPiso01.tsv"
   n_pfric <- "SubiBaja01.csv"
   
   
@@ -42,7 +43,7 @@ setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   hor <- read.csv(n_hor, sep = "\t", header = F)
   inc <- read.csv(n_inc, sep = "\t", header = F)
   inc_fric <- read.csv(n_fric, sep = "\t", header = F)
-  p1 <- read.csv(n_plano1, sep = ";", header = T)
+  pCom <- read.csv(n_plano1, sep = ";", header = T)
   m_f <- read.csv(n_pfric, sep = ";", header = T)
   
   
@@ -51,79 +52,80 @@ setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   inc <- limpieza(inc)
   inc_fric <- limpieza(inc_fric)
   
-  colnames(m_f) <- c("t", "x", "v", "a") -> colnames(p1)
+  colnames(m_f) <- c("t", "x", "v", "a") -> colnames(pCom)
   
   #####
-  # según la calibración
-  # ang_acel <- ang_real * 1.0283 + 0.8834
-  # ang_real <- (ang_acel - 0.8834) / 1.0283
-  angs <- angulos(hor, inc)
-  ang_cal <- (mean(angs) - 0.8834) / 1.0283
-  hist(angs)
-  mean(angs)
-  angulo_cal
+  # Medidas en el plano yz
+  hor_yz <- hor;  inc_yz <- inc; inc_yz$ax <- 0
   
-  op <- 4; hip <- 200 # cm
-  d.l <- 0.1 # cm
-  ang_trig <- asin(op/hip) * 180 / pi
-  ang_trig  
-  # error =  
+  # angulos
+  angs <- angulos(hor_yz, inc_yz)
+  # el angulo trig no toma en cuenta la inclinación de la mesa
+  op <- 4; hip <- 200; seno <- op / hip; d.l <- 0.1 # cm
+  ang_trig <- asin(seno) * 180 / pi
+  d.ang_trig <- (d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)
+  d.ang_trig <- d.ang_trig * 180 / pi
+  stdDev <- sd(angs)
+  d.angs <- stdDev / length(angs)
+  d.angs
   
-  # plot(p1$t, p1$x, main = " datos completos, pos vs tiempo")
-  # plot(p1$t, p1$v, main = " datos compleots, vel vs tiempo")
-  # m <- p1[p1$t < 2.5 & p1$t > 1.5,]
-  # plot(m$t, m$x)
-  # comienzo <- 1.75
-  # final <- 6
+  #####
+  plot(pCom$t, pCom$x, main = " datos completos, pos vs tiempo")
+  comienzo <- 1.85;  final <- 5
   
-  p2 <- p1[p1$t >comienzo & p1$t < final,]
-  t_0 <- p2$t[1]
-  x_0 <- p2$x[1]
-  p2$t <- p2$t - t_0
-  p2$x <- p2$x - x_0
-  
-  plot(p2$t, p2$x, main = "pos vs tiempo limpios")
+  pRec <- pCom[pCom$t >comienzo & pCom$t < final,]
+  # t0 = 0, x0 = 0
+  pRec$t <- pRec$t - pRec$t[1]; pRec$x <- pRec$x - pRec$x[1]
+  plot(pRec$t, pRec$x, main = "pos vs tiempo limpios")
   
   # angulo perfecto
-  ang_per <- asin((2 * p2[p2$t != 0,]$x)/ (Raga * p2[p2$t != 0,]$t**2))
-  
+  ang_per <- asin((2 * pRec[pRec$t != 0,]$x)/ (Raga * pRec[pRec$t != 0,]$t**2)) * 180 / pi
+    
   # angulo con el ajuste lineal
-  x <- p2$t**2
-  y <- p2$x
+  x <- pRec$t**2; y <- pRec$x
   aju <- lm(y ~ x)
-  ord.origen <- aju$coefficients[1]
-  pendiente <- aju$coefficients[2]
+  ord.origen <- aju$coefficients[1]; pendiente <- aju$coefficients[2]
   an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
+  # modelos:
   
+  for (i in c(-1,0,1)){
+  lines(pRec$t, x <- 1/2*  (acel_plano(ang_trig+i*d.ang_trig)) * pRec$t^2, col = "red")
+  }
   
-  lines(p2$t, x <- 1/2*  acel_plano(mean(angs)) * p2$t^2, col = "Blue")
-  # lines(p2$t, x <- 1/2* (acel_plano(mean(angs)) - Frsubida) * p2$t^2, col = "Blue")
-  # lines(p2$t, x <- 1/2* acel_bj * p2$t**2, col = "green")
-  lines(p2$t, x <- 1/2* acel_plano(mean(ang_per) * 180 / pi) * p2$t^2, col = "Yellow")
-  lines(p2$t, x <- 1/2* acel_plano(an_aju) * p2$t^2, col = "Red")
+  lines(pRec$t, x <- 1/2* acel_plano(mean(ang_per)) * pRec$t^2, col = "Yellow")
+  lines(pRec$t, x <- 1/2* acel_plano(an_aju) * pRec$t^2, col = "Red")
   
-  plot(p2$t, p2$v, "vel vs tiempo limpios")
+  # vel vs tiempo
+  plot(pRec$t, pRec$v, main = "vel vs tiempo limpios")
+  for (i in -1:1){
+    abline(a = 0, b = acel_plano(ang_trig + i*d.ang_trig), col = "blue")
+  }
+  abline(a = 0, b = acel_plano((mean(ang_per))), col = "yellow")
+  abline(a = ord.origen, b = acel_plano(an_aju), col = "red")
   
+  # acel vs tiempo
+  plot(pRec$t, pRec$a, main = "acel vs tiempo")
+  for (i in -1:1){
+    abline(h = acel_plano(ang_trig + i *d.ang_trig), col = "blue")
+  }
+  abline(h = acel_plano(mean(ang_per)), col = "yellow")
+  abline(h = acel_plano(an_aju), col = "red")
+  abline(h = mean(pRec$a))
+  
+  #####
   # ajuste lineal
   
-  plot(x = p2$t**2,y = p2$x, main = "Ajuste lineal")
-  abline(aju, col= "blue")
+  plot(x = pRec$t**2,y = pRec$x, main = "Ajuste lineal", 
+       xlab = "t^2(s^2)", ylab = "x(m)")
+  abline(a= 0, b = 1/2 * acel_plano(mean(angs)), col = "blue")
+  abline(a = 0, b = 1/2 * acel_plano(mean(ang_per)), col = "yellow")
+  abline(aju, col= "red")
   
-  abline(a= 0, b = 1/2 * ((((sin(mean(angs))* pi / 180))* Raga) - cteFr))
-  # hist(ang_per)
-  # # y = posición x = t²
-  # x = i/2 sen(alpha) g t²
-  # alpha = asen(2 * pendiente / g)
-  # pendiente = 1/2 sen(a) g
-  # pendiente * 2 / g = sen(a)
-  # arcoseno(pendiente * 2 / g) = a
-  
+  #####
   ##########################################
   # Fricción constante
-  # 
-  f_ang <- angulos(hor, inc_fric)
-  # hist(f_ang, breaks = nclass.FD(f_ang))
+  f_ang <- angs
   
   # a la ida tiene la aceleración de la gravedad más la producida por la fricción
   plot(m_f$t, m_f$x, main = "fricción pos vs t")
@@ -155,35 +157,12 @@ setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   
   
   # limpieza bajada
-  bajada <- bajada[bajada$t < 10 & bajada$t > 6,]
+  # bajada <- bajada[bajada$t < 10 & bajada$t > 6,]
   plot(bajada$t, bajada$v, main = "friccion vel vs t bajada limpio")
   aju_bj <- lm(bajada$v ~ bajada$t)
   abline(aju_bj)
   acel_bj <- aju_bj$coefficients[2]
   text(x = 8, y = 0.15, label = paste("acel bajada:", acel_bj))
-  
-  # acel subida = acelG + fr
-  # acel bajada = acelG - fr
-  
-  # acel subida - fr = acelG
-  # acel bajada + fr = acelG
-  
-  # acel subida - fr = acel bajada + fr
-  # acel subida - acel bajada = 2 fr
-  # (acel subida - acel bajada) / 2 = fr
-  
+
   cteFr <- (acel_sb - acel_bj) / 2
-  print(paste("fricción:", cteFr))
   
-  Frsubida <- acel_sb - acel_plano(mean(angs))
-  Frbajada <- acel_plano(mean(angs)) - acel_bj
-  (Frbajada + Frsubida) / 2
-  
-  ######################## Mensajes
-  print(paste("Alpha seguń el ajuste lineal es: ", an_aju, "°", sep = ""))
-  
-  print(paste("El angulo calculado es: ", mean(angs)))
-  
-  print(paste("El angulo tomado con la función es:",mean(ang_per) * 180 / pi))
-  
-  print(paste("coordenada al origen:", ord.origen))
