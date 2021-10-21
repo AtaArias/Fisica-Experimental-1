@@ -22,11 +22,11 @@
     ppunto <- set1$ax * set2$ax + set1$ay * set2$ay + set1$az* set2$az
     coseno <- ppunto / (set1$g * set2$g)
     
-    angulo <- acos(coseno) * 180 / pi
+    angulo <- acos(coseno)
   }
   
   acel_plano <- function(angle) {
-    sin(angle * pi / 180) * Raga
+    sin(angle) * Raga
   }
   
   #####
@@ -43,6 +43,10 @@
   col_ajuste <- colores[1]
   col_error <- colores[5]
   col_fric <- colores[8]
+  
+  
+  d.t <- mean(pCom[2:nrow(pCom),]$t - pCom[1:nrow(pCom)-1,]$t)
+  
   #####
   # lectura de datos
   hor <- read.csv(n_hor, sep = "\t", header = F)
@@ -67,51 +71,55 @@
   d.angs <- stdDev / sqrt(length(angs))
   ang_cel <- mean(angs)
   acel_cel <- acel_plano(ang_cel)
-  d.acel_cel <- cos(ang_cel * pi / 180) * Raga * d.angs
-  
+
   
   # Angulos con los catetos
   # el angulo trig no toma en cuenta la inclinación de la mesa
   op <- 4; hip <- 200; seno <- op / hip; d.l <- 0.1 # cm
-  ang_trig <- asin(seno) * 180 / pi
-  d.ang_trig <- ((d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)) * 180 / pi
-  d.acel_trig <- cos(d.ang_trig) * Raga  * d.ang_trig
-  
+  ang_trig <- asin(seno)
+  d.ang_trig <- ((d.l /( hip * sqrt(1 - seno^2)))*(1 + seno))
+  acel_trig <- acel_plano(ang_trig)
+
   #####
   # Recorte y grafíca de los datos
   comienzo <- 1.85;  final <- 5
   pRec <- pCom[pCom$t >comienzo & pCom$t < final,]
   pRec$t <- pRec$t - pRec$t[1]; pRec$x <- pRec$x - pRec$x[1] # t0 = 0, x0 = 0
-  plot(x = pRec$t, y= pRec$x, main = "Posición vs tiempo",
-       xlab = "Tiempo (s)", ylab = " Posición (m)",
+  plot(x = pRec$t, y= pRec$x, main = "x vs t",
+       xlab = "t(s)", ylab = " x (m)",
        pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   
   # Cálculo de los ángulos ajustados
   # Ángulo perfecto
-  ang_per <- asin((2 * pRec[pRec$t != 0,]$x)/ (Raga * pRec[pRec$t != 0,]$t**2)) * 180 / pi
+  # ang_per <- asin((2 * pRec[pRec$t != 0,]$x)/ (Raga * pRec[pRec$t != 0,]$t**2)) * 180 / pi
   
   # modelos:
   # modelo con el ángulo trigonométrico 
+  # Dx = 1/2 g cos a t^2 d.a + g sen a t d.t
   for (i in c(-1,0,1)){
-    lines(pRec$t, x <- 1/2*  (acel_cel + i * d.acel_cel) * pRec$t^2, col = col_modelo, lwd = 2-abs(i))
+    lines(pRec$t, x <- 1/2*  (acel_cel - cteFr) * pRec$t^2 + i * (1/2 * Raga * cos(ang_cel) * pRec$t^2 *d.angs + Raga * sin(ang_cel)* pRec$t * d.t), col = col_modelo, lwd = 2-abs(i))
+    lines(pRec$t, x <- 1/2*  (acel_trig - cteFr)  * pRec$t^2 + i * (1/2 * Raga * cos(ang_trig) * pRec$t^2 *d.ang_trig + Raga * sin(ang_trig)* pRec$t * d.t), col = col_error, lwd = 2-abs(i))
   }
   
   #ajuste cuadrático
   pRec$t2 <- pRec$t^2
-  aju_cu <- lm(formula = x ~ t + t2 - t - 1, data = pRec)
+  aju_cu <- lm(formula = x ~ t + t2, data = pRec)
   sa <- summary(aju_cu)
-  acel_aju <- 2 * sa$coefficients[1,1]
-  d.acel_aju <- 2 * sa$coefficients[1,2]
+  x0_aju <- sa$coefficients[1,1]; d.x0_aju <- sa$coefficients[1,2]
+  v0_aju <- sa$coefficients[2,1]; d.v0_aju <- sa$coefficients[2,2]
+  acel_aju <- 2 * sa$coefficients[3,1];d.acel_aju <- 2 * sa$coefficients[3,2]
   ang_aju_c <- asin(acel_aju/Raga) * 180 / pi 
-    
-  lines(pRec$t, x <- (acel_aju / 2) * pRec$t^2 , col = col_ajuste, lwd = 2)
+  
+  # D aju
+  # [a t+v0]d.t+t^2 / 2 d.a + t d.v + dx
+  for (i in -1:1){
+    lines(pRec$t, x <- (acel_aju / 2) * pRec$t^2 +v0_aju * pRec$t + x0_aju + i * ( (acel_aju * pRec$t + v0_aju)*d.t + pRec$t^2 / 2 * d.acel_aju + pRec$t * d.v0_aju + d.x0_aju), col = col_ajuste, lwd = 2)
+  }
   
   # leyenda
   legend(x = min(pRec$t), y = max(pRec$x), 
-         legend = c("Mediciones",
-                    paste("Modelo, Ángulo medido: ", round(ang_cel, 3), "°", sep = ""),
-                    paste("Ajuste. Ángulo calulado: ",round(ang_aju_c, 3),"°", sep = "")),
-         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
+         legend = c("Mediciones", "Modelo acelerometro", "Modelo trigonometría", "Ajuste cuadrático"),
+         col = c("black", col_modelo, col_error, col_ajuste), lty =c(0,1,1,1), lwd = c(0,3,3,3), bty = "n", pch = c(16,26,26,26))
   
   
   
