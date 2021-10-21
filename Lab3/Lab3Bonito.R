@@ -124,7 +124,7 @@
     abline(a = 0, b = (acel_cel + i * d.acel_cel), col = col_modelo, lwd = 2-abs(i))
   }
   
-  abline(a = ord.origen, b = acel_aju, col = col_ajuste, lwd = 2)
+  abline(a = 0, b = acel_aju, col = col_ajuste, lwd = 2)
   
   
   # leyenda
@@ -155,7 +155,7 @@
   # Ajuste lineal
   x <- pRec$t**2; y <- pRec$x
   aju_li <- lm(y ~ x)
-  ord.origen <- aju$coefficients[1]; pendiente <- aju$coefficients[2]
+  ord.origen <- aju_li$coefficients[1]; pendiente <- aju_li$coefficients[2]
   ang_aju_li <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
   plot(x = pRec$t**2,y = pRec$x, main = "Ajuste lineal", 
@@ -268,7 +268,7 @@
   
   # leyenda
   legend(x = min(pRec$t), y = max(pRec$x), 
-         legend = c("Mediciones", "x = 1/2 g sen(a) t^2", "x = 1/2 (g sen(a) - Fr) t^2"),
+         legend = c("Mediciones", "Modelo sin fricción", "Modelo con fricción"),
          col = c("black", col_modelo, col_fric), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
   
   
