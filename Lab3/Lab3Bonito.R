@@ -1,5 +1,6 @@
   setwd(paste(getwd(), "Lab3", "datos", sep = "/"))
   library(ggplot2)
+  library(paletteer)
   #####
   # funciones
   gravedad <- function(set) {
@@ -37,6 +38,9 @@
   n_fric <- "acelPiso01.tsv"
   n_pfric <- "SubiBaja01.csv"
   
+  colores <- paletteer::paletteer_d("awtools::ppalette")
+  col_modelo <- colores[3]
+  col_ajuste <- colores[1]
   
   #####
   # lectura de datos
@@ -55,48 +59,57 @@
   colnames(m_f) <- c("t", "x", "v", "a") -> colnames(pCom)
   
   #####
-  # Medidas en el plano yz
-  hor_yz <- hor;  inc_yz <- inc; inc_yz$ax <- 0
-  
-  # angulos
+  # Ángulos con acelerómetro
+  hor_yz <- hor; hor_yz$ax <- 0  ;inc_yz <- inc; inc_yz$ax <- 0
   angs <- angulos(hor_yz, inc_yz)
+  stdDev <- sd(angs)
+  d.angs <- stdDev / sqrt(length(angs))
+  
+  # Angulos con los catetos
   # el angulo trig no toma en cuenta la inclinación de la mesa
   op <- 4; hip <- 200; seno <- op / hip; d.l <- 0.1 # cm
   ang_trig <- asin(seno) * 180 / pi
   d.ang_trig <- ((d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)) * 180 / pi
-  stdDev <- sd(angs)
-  d.angs <- stdDev / length(angs)
+  
   
   #####
+  # Recorte y grafíca de los datos
   comienzo <- 1.85;  final <- 5
   pRec <- pCom[pCom$t >comienzo & pCom$t < final,]
   pRec$t <- pRec$t - pRec$t[1]; pRec$x <- pRec$x - pRec$x[1] # t0 = 0, x0 = 0
-  plot(pRec$t, pRec$x, main = "pos vs tiempo limpios")
+  plot(x = pRec$t, y= pRec$x, main = "Posición vs tiempo",
+       xlab = "Tiempo (s)", ylab = " Posición (m)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   
-  # angulo perfecto
+  # Cálculo de los ángulos ajustados
+  # Ángulo perfecto
   ang_per <- asin((2 * pRec[pRec$t != 0,]$x)/ (Raga * pRec[pRec$t != 0,]$t**2)) * 180 / pi
-    
-  # angulo con el ajuste lineal
-  x <- pRec$t**2; y <- pRec$x
-  aju <- lm(y ~ x)
-  ord.origen <- aju$coefficients[1]; pendiente <- aju$coefficients[2]
-  an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
   # modelos:
-  
+  # modelo con el ángulo trigonométrico 
   for (i in c(-1,0,1)){
-  lines(pRec$t, x <- 1/2*  (acel_plano(ang_trig+i*d.ang_trig)) * pRec$t^2, col = "red")
-  lines(pRec$t, x <- 1/2*  ((acel_plano(ang_trig+i*d.ang_trig))-cteFr) * pRec$t^2, col = "red")
+  lines(pRec$t, x <- 1/2*  (acel_plano(ang_trig+i*d.ang_trig)) * pRec$t^2, col = col_modelo, lwd = 2-abs(i))
   }
   
   #ajuste cuadrático
-  aju_cu <- lm(pRec$x ~ poly(pRec$t, degre = 2, raw = T))
+  pRec$t2 <- pRec$t^2
+  aju_cu <- lm(formula = x ~ t + t2 - t - 1, data = pRec)
   sa <- summary(aju_cu)
-  acel_aju <- 2 * sa$coefficients[3,2]
-  d.acel_aju <- 2 * sa$coefficients[3,1]
+  acel_aju <- 2 * sa$coefficients[1,1]
+  d.acel_aju <- 2 * sa$coefficients[1,2]
+  ang_aju_c <- asin(acel_aju/Raga) * 180 / pi 
+    
+  lines(pRec$t, x <- (acel_aju / 2) * pRec$t^2 , col = col_ajuste, lwd = 2)
   
-  lines(pRec$t, x <- 1/2* acel_plano(mean(ang_per)) * pRec$t^2, col = "Yellow")
-  lines(pRec$t, x <- 1/2* acel_plano(an_aju) * pRec$t^2, col = "Red")
+  # leyenda
+  legend(x = min(pRec$t), y = max(pRec$x), 
+         legend = c("Mediciones",
+                    paste("Modelo  ", "Ángulo: ", round(ang_trig, 4), "°", sep = ""),
+                    paste("Ajuste  ", "Ángulo: ",round(ang_aju_c,4),"°", sep = "")),
+         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
+  
+  
+  
   
   # vel vs tiempo
   plot(pRec$t, pRec$v, main = "vel vs tiempo limpios")
@@ -116,13 +129,16 @@
   abline(h = mean(pRec$a))
   
   #####
-  # ajuste lineal
+  # Ajuste lineal
+  x <- pRec$t**2; y <- pRec$x
+  aju <- lm(y ~ x)
+  ord.origen <- aju$coefficients[1]; pendiente <- aju$coefficients[2]
+  an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
   plot(x = pRec$t**2,y = pRec$x, main = "Ajuste lineal", 
        xlab = "t^2(s^2)", ylab = "x(m)")
-  abline(a= 0, b = 1/2 * acel_plano(mean(angs)), col = "blue")
-  abline(a = 0, b = 1/2 * acel_plano(mean(ang_per)), col = "yellow")
-  abline(aju, col= "red")
+  abline(a= 0, b = 1/2 * acel_plano(ang_trig), col = col_modelo, lwd = 2)
+  abline(aju, col= col_ajuste, lwd = 2)
   
   ############################################
   # acel vs sen(a)
