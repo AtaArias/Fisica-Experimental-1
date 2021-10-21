@@ -20,6 +20,7 @@ b_papel <- b_papel[b_papel$densidad < median(b_papel$densidad) + 100 & b_papel$d
 
 b_alum <- bolas[bolas$Papel == "aluminio",]
 
+par(mar = c(6.1, 5.1, 5.1, 1.1))
 #####
 # radio vs masa
 plot(x = b_papel$m_mg, y = b_papel$r_cm,
@@ -31,6 +32,8 @@ plot(x = b_papel$m_mg, y = b_papel$r_cm,
 aju_p <- lm(b_papel$r_cm ~ b_papel$m_mg)
 abline(aju_p, lwd = 2, col = "yellow")
 
+legend(x = 1000, y = 3, legend = "Ajuste lineal",
+       col = "yellow", lwd = 3, bty = "n", cex = 1.25)
 
 
 # aluminio
@@ -42,6 +45,9 @@ plot(x = b_alum$m_mg, y = b_alum$r_cm,
 
 aju_al <- lm(b_alum$r_cm ~ b_alum$m_mg)
 abline(aju_al, lwd = 2, col = "blue")
+
+legend(x = 1000, y = 1.8, legend = "Ajuste lineal",
+       col = "blue", lwd = 3, bty = "n", cex = 1.25)
 
 #####
 # log(radio) vs log(masa)
@@ -57,11 +63,15 @@ corte <- aju_plog$coefficients[1]
 pendiente <- aju_plog$coefficients[2]
 r.sq <- summary(aju_plog)$r.squared
 
-text(x = 0.5, y = 7, label = paste("corte al origen: ", round(corte, 4)) )
-text(x = 0.5, y = 6.8, label = paste("pendiente: ", round(pendiente, 4)))
-text(x = 0.5, y = 6.6, label = paste("rsquared: ", round(r.sq, 4)))
+legend(x = 6.3, y = 1.15, legend = c(paste("y =", round(pendiente, 3),"* x ", round(corte,3)),
+                                  paste("Dimensión efectiva: ", round(1/pendiente, 3))),
+       bty = "n", lwd = 3, lty = c(1,0), col = "yellow", cex  = 1.25)
 
-# p_lden <- 1 / pendiente  # grafica log 
+# densidad <- e^(-3 * corte) * 3 / (4 * pi)
+p_den <- (exp(-3 * corte) * 3 )/ (4 * pi)
+3 * exp(-3* corte) / (4 * pi)
+p_den
+
 
 # aluminio
 plot(x = log(b_alum$m_mg), y = log(b_alum$r_cm),
@@ -77,11 +87,12 @@ al_corte <- aju_alog$coefficients[1]
 al_pend <- aju_alog$coefficients[2]
 al_rsq <- summary(aju_alog)$r.squared
 
-text(x = 0.3, y = 7.25, 
-     label = paste("corte: ", round(al_corte, 4), "\npendiente: ", round(al_pend, 4), "\nrsquared: ", round(al_rsq, 4)))
-
+legend(x = 6.7, y = 0.61, legend = c(paste("y =", round(al_pend, 3),"* x ", round(al_corte,3)),
+                                     paste("Dimensión efectiva: ", round(1/al_pend, 3))),
+       bty = "n", lwd = 3, lty = c(1,0), col = "blue", cex  = 1.25)
 # al_lden <- exp(-3 * al_corte) *3 / (4 * pi)
 # al_lden  
+# mean(b_alum$densidad)
 #####
 # densidad vs radio
 plot(y = b_papel$densidad, x = b_papel$r_cm,
@@ -113,20 +124,15 @@ plot(y = b_alum$densidad, x = b_alum$m_mg,
 
 #####
 # chequear todas las nombres y el sem de su densidad
-nombres <- NULL
-for (nombre in b_papel$Nombre){
-  if (!(nombre %in% nombres))
-    nombres <- c(nombres, nombre)
-}
-for (nombre in nombres){
-  print(nombre)
-  current <- b_papel[b_papel$Nombre == nombre,]
-  hist(current$densidad, 
-       main = paste("Histograma de densidades: ",nombre), 
-       breaks = nclass.FD(current$densidad))
-}
-
-
-print(paste("La densidad según el ajuste log-log de papel es:", p_lden,
-            "La densidad a calculada es: ", mean(b_papel$densidad),
-            "La dimensión efectiva es: ", 1 / pendiente))
+# nombres <- NULL
+# for (nombre in b_papel$Nombre){
+#   if (!(nombre %in% nombres))
+#     nombres <- c(nombres, nombre)
+# }
+# for (nombre in nombres){
+#   print(nombre)
+#   current <- b_papel[b_papel$Nombre == nombre,]
+#   hist(current$densidad, 
+#        main = paste("Histograma de densidades: ",nombre), 
+#        breaks = nclass.FD(current$densidad))
+# }
