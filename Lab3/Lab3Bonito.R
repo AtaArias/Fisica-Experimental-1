@@ -41,7 +41,8 @@
   colores <- paletteer::paletteer_d("awtools::ppalette")
   col_modelo <- colores[3]
   col_ajuste <- colores[1]
-  
+  col_error <- colores[5]
+  col_fric <- colores[8]
   #####
   # lectura de datos
   hor <- read.csv(n_hor, sep = "\t", header = F)
@@ -64,13 +65,17 @@
   angs <- angulos(hor_yz, inc_yz)
   stdDev <- sd(angs)
   d.angs <- stdDev / sqrt(length(angs))
+  ang_cel <- mean(angs)
+  acel_cel <- acel_plano(ang_cel)
+  d.acel_cel <- cos(ang_cel * pi / 180) * Raga * d.angs
+  
   
   # Angulos con los catetos
   # el angulo trig no toma en cuenta la inclinación de la mesa
   op <- 4; hip <- 200; seno <- op / hip; d.l <- 0.1 # cm
   ang_trig <- asin(seno) * 180 / pi
   d.ang_trig <- ((d.l /( hip * sqrt(1 - seno^2)))*(1 + seno)) * 180 / pi
-  
+  d.acel_trig <- cos(d.ang_trig) * Raga  * d.ang_trig
   
   #####
   # Recorte y grafíca de los datos
@@ -88,7 +93,7 @@
   # modelos:
   # modelo con el ángulo trigonométrico 
   for (i in c(-1,0,1)){
-  lines(pRec$t, x <- 1/2*  (acel_plano(ang_trig+i*d.ang_trig)) * pRec$t^2, col = col_modelo, lwd = 2-abs(i))
+    lines(pRec$t, x <- 1/2*  (acel_cel + i * d.acel_cel) * pRec$t^2, col = col_modelo, lwd = 2-abs(i))
   }
   
   #ajuste cuadrático
@@ -104,41 +109,71 @@
   # leyenda
   legend(x = min(pRec$t), y = max(pRec$x), 
          legend = c("Mediciones",
-                    paste("Modelo  ", "Ángulo: ", round(ang_trig, 4), "°", sep = ""),
-                    paste("Ajuste  ", "Ángulo: ",round(ang_aju_c,4),"°", sep = "")),
+                    paste("Modelo, Ángulo medido: ", round(ang_cel, 3), "°", sep = ""),
+                    paste("Ajuste. Ángulo calulado: ",round(ang_aju_c, 3),"°", sep = "")),
          col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
   
   
   
   
   # vel vs tiempo
-  plot(pRec$t, pRec$v, main = "vel vs tiempo limpios")
+  plot(pRec$t, pRec$v, main = "Velocidad vs tiempo",
+       xlab = "Tiempo(s)", ylab = "Velocidad(m/s)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   for (i in -1:1){
-    abline(a = 0, b = acel_plano(ang_trig + i*d.ang_trig), col = "blue")
+    abline(a = 0, b = (acel_cel + i * d.acel_cel), col = col_modelo, lwd = 2-abs(i))
   }
-  abline(a = 0, b = acel_plano((mean(ang_per))), col = "yellow")
-  abline(a = ord.origen, b = acel_plano(an_aju), col = "red")
+  
+  abline(a = ord.origen, b = acel_aju, col = col_ajuste, lwd = 2)
+  
+  
+  # leyenda
+  legend(x = min(pRec$t), y = max(pRec$v), 
+         legend = c("Mediciones",
+                    paste("Modelo, pendiente:",round(acel_cel,3)),
+                    paste("Ajuste, pendiente:",round((acel_aju),3))),
+         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
+  
   
   # acel vs tiempo
-  plot(pRec$t, pRec$a, main = "acel vs tiempo")
+  plot(pRec$t, pRec$a, main = "Aceleración vs tiempo",
+       xlab = "Tiempo(s)", ylab = "Aceleración(m/s2)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   for (i in -1:1){
-    abline(h = acel_plano(ang_trig + i *d.ang_trig), col = "blue")
+    abline(h = acel_cel + i * d.acel_cel, col = col_modelo, lwd = 2-abs(i))
   }
-  abline(h = acel_plano(mean(ang_per)), col = "yellow")
-  abline(h = acel_plano(an_aju), col = "red")
-  abline(h = mean(pRec$a))
+  abline(h = acel_aju, col = col_ajuste, lwd = 2)
+  
+  # leyenda
+  legend(x = 0, y = 0.05,
+         legend = c("Mediciones", 
+                    paste("Acel modelo:", round(acel_cel,3), "m/s^2"),
+                    paste("Acel ajuste:", round(acel_aju,3), "m/s^2")),
+         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
   
   #####
   # Ajuste lineal
   x <- pRec$t**2; y <- pRec$x
-  aju <- lm(y ~ x)
+  aju_li <- lm(y ~ x)
   ord.origen <- aju$coefficients[1]; pendiente <- aju$coefficients[2]
-  an_aju <- asin((2 * pendiente )/ Raga ) * 180 / pi
+  ang_aju_li <- asin((2 * pendiente )/ Raga ) * 180 / pi
   
   plot(x = pRec$t**2,y = pRec$x, main = "Ajuste lineal", 
-       xlab = "t^2(s^2)", ylab = "x(m)")
-  abline(a= 0, b = 1/2 * acel_plano(ang_trig), col = col_modelo, lwd = 2)
-  abline(aju, col= col_ajuste, lwd = 2)
+       xlab = "t^2(s^2)", ylab = "Posición(m)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
+  for(i in -1:1){
+    abline(a= 0, b = 1/2 * (acel_cel + i*d.acel_cel), col = col_modelo, lwd = 2-abs(i))
+  }
+  
+  abline(aju_li, col= col_ajuste, lwd = 2)
+  
+  # leyenda
+  legend(x = min(pRec$t), y = max(pRec$x), 
+         legend = c("Mediciones",
+                    paste("Modelo, pendiente: ", round(acel_cel / 2, 3)),
+                    paste("Ajuste lineal, pendiente: ",round(pendiente, 3))),
+         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
+  
   
   ############################################
   # acel vs sen(a)
@@ -146,62 +181,94 @@
   acels_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vShqcluBL3-Gxk9bj1ceO6cy-inHN5THAlMP75_fdK05gfAF3aDFDNLJXb2MqZA9bxPXj4Xir0Baqc2/pub?gid=0&single=true&output=csv"
   acels <- read.csv(acels_url, header = T, sep = ",")
   colnames(acels) <- c("acel", "ang", "d.ang", "d.acel", "nombre")
-  # calculo el seno de los angulos
   acels$sin <- sin(acels$ang * pi / 180)
+  
   # ploteo acel vs seno y el ajuste lineal
-  plot(y = acels$acel, x = acels$sin)
-  abline(a = 0, b = Raga)
+  plot(y = acels$acel, x = acels$sin, main = "Datos de todos",
+       xlab = "Seno(ángulo)", ylab = "Aceleración(m/s^2)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
+  abline(a = 0, b = Raga, col = col_modelo, lwd = 2)
   aju_todos <- lm(acels$acel ~ acels$sin)
-  abline(aju_todos)
+  abline(aju_todos, lwd = 2, col = col_ajuste)
+  
+  # error
   arrows(x0 = acels$sin, x1 = acels$sin,
          y0 = acels$acel - acels$d.acel, y1 = acels$acel + acels$d.acel,
-         length = 0, col ="blue")
+         length = 0, col =col_error, lwd = 2)
   
+  # leyenda
+  legend(x = min(acels$sin), y = max(acels$acel),
+         legend = c("Mediciones", "y = Raga * x",
+                    paste("Ajuste lineal, pendiente: ", round(aju_todos$coefficients[2],3))),
+         col = c("black", col_modelo, col_ajuste), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  #####
   ##########################################
   # Fricción constante
-  f_ang <- angs
-  
-  # a la ida tiene la aceleración de la gravedad más la producida por la fricción
-  plot(m_f$t, m_f$x, main = "Subida-Bajada", ylab = "x(m)", xlab = "t(s)")
+  # subida a + fr
+  plot(m_f$t, m_f$x, main = "Subida-Bajada", ylab = "x(m)", xlab = "t(s)",
+       pch = 20, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   
   min <- min(m_f$x)
   t_min <- m_f[m_f$x == min,]$t; t_min <- mean(t_min)
   
   subida <- m_f[m_f$t < t_min,]
-  plot(subida$t, subida$x, main = "friccion pos vs t subida")
+  plot(subida$t, subida$x, main = "Posición vs tiempo, Subida",
+       xlab = "Posición(m)", ylab = "Tiempo(s)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   # limpieza subida
   subida <- subida[subida$t > 1.2 & subida$t < 4.5,]
-  plot(subida$t, subida$v, main = "friccion vel vs t subida limpio")
+  plot(subida$t, subida$v, main = "Velocidad vs tiempo, Subida",
+       ylab = "Velocidad(m/s)", xlab = "Tiempo(s)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   aju_sb <- lm(subida$v ~ subida$t)
-  abline(aju_sb)
+  abline(aju_sb, lwd = 2, col = col_ajuste)
   acel_sb <- aju_sb$coefficients[2]
-  text(x = 3, y = -0.5, label = paste("acel subida:", acel_sb))
+  legend(x = min(subida$t), y = max(subida$v),
+         legend = c("Mediciones", paste("Ajuste lineal, pendiente: ", round(acel_sb,3))),
+         col = c("black", col_ajuste), lty =c(0,1), lwd = c(0,3), bty = "n", pch = c(16,26))
+  sm_sb <- summary(aju_sb)
+  err_sb <- sm_sb$coefficients[2,2]
+  
   
   
   bajada <- m_f[m_f$t > t_min,]
-  plot(bajada$t, bajada$x, main = "fricción pos vs t bajada")
+  plot(bajada$t, bajada$x, main = "Posición vs tiempo, Bajada",
+       xlab = "Posición(m)", ylab = "Tiempo(s)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   # limpieza bajada
-  plot(bajada$t, bajada$v, main = "friccion vel vs t bajada limpio")
+  bajada <- bajada[bajada$t > 4.8 & bajada$t < 9,]
+  plot(bajada$t, bajada$v, main = "Velocidad vs tiempo, Bajada",
+       ylab = "Velocidad(m/s)", xlab = "Tiempo(s)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
   aju_bj <- lm(bajada$v ~ bajada$t)
-  abline(aju_bj)
+  abline(aju_bj, lwd = 2, col = col_ajuste)
   acel_bj <- aju_bj$coefficients[2]
-  text(x = 8, y = 0.15, label = paste("acel bajada:", acel_bj))
-
-  cteFr <- (acel_sb - acel_bj) / 2
+  legend(x = min(bajada$t), y = max(bajada$v),
+         legend = c("Mediciones", paste("Ajuste lineal, pendiente: ", round(acel_bj,3))),
+         col = c("black", col_ajuste), lty =c(0,1), lwd = c(0,3), bty = "n", pch = c(16,26))
+  sm_bj <- summary(aju_bj)
+  err_bj <- sm_bj$coefficients[2,2]
   
+  cteFr <- (acel_sb - acel_bj) / 2
+  d.cteFr <- (err_bj + err_sb) / 2
+  text(x = 7, y = 0.1, label = paste("Aceleración producida por la fricción:\n", round(cteFr,3),"m/s^2"))
+  
+  #################
+  # Datos de la bajada todos + fricción
+  plot(x = pRec$t, y= pRec$x, main = "Posición vs tiempo",
+       xlab = "Tiempo (s)", ylab = " Posición (m)",
+       pch = 16, cex.main = 2, cex.axis = 1.5, cex.lab = 1.5)
+  for (i in c(-1,0,1)){
+    lines(pRec$t, x <- 1/2* (acel_cel + i* d.acel_cel) * pRec$t^2, col = col_modelo, lwd = 2-abs(i))
+  }
+  
+  for (i in c(-1,0,1)){
+    lines(pRec$t, x <- 1/2* (acel_cel + i* d.acel_cel - cteFr) * pRec$t^2, col = col_fric, lwd = 2-abs(i))
+  }
+  
+  # leyenda
+  legend(x = min(pRec$t), y = max(pRec$x), 
+         legend = c("Mediciones", "x = 1/2 g sen(a) t^2", "x = 1/2 (g sen(a) - Fr) t^2"),
+         col = c("black", col_modelo, col_fric), lty =c(0,1,1), lwd = c(0,3,3), bty = "n", pch = c(16,26,26))
   
   
