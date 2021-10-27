@@ -16,7 +16,7 @@ bolas <- read.csv(bolas_url, header = T, sep = ",")
 bolas$densidad <- bolas$m_mg / ((bolas$r_cm^3) * 4/3 * pi)
 
 b_papel <- bolas[bolas$Papel == "papel",]
-b_papel <- b_papel[b_papel$densidad < median(b_papel$densidad) + 100 & b_papel$densidad > median(b_papel$densidad) - 100,]
+#  b_papel <- b_papel[b_papel$densidad < median(b_papel$densidad) + 100 & b_papel$densidad > median(b_papel$densidad) - 100,]
 
 b_alum <- bolas[bolas$Papel == "aluminio",]
 
@@ -135,4 +135,5 @@ plot(y = b_alum$densidad, x = b_alum$m_mg,
 #   hist(current$densidad, 
 #        main = paste("Histograma de densidades: ",nombre), 
 #        breaks = nclass.FD(current$densidad))
-# }
+# 
+

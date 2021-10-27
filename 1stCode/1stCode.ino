@@ -38,7 +38,8 @@ void loop() {
   Serial.print(" ; ");
   Serial.print(second(), DEC);
   Serial.print(" ; ");
-  Serial.println(temp);
+  Serial.print(temp);
+  Serial.println("°");
 
   /* Demora hasta la siguiente medida */
   delay(1000);
