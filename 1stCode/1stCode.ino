@@ -1,4 +1,4 @@
-/* Carga de librerías  */
+/* Carga de librerías  */x
 #include <TimeLib.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
