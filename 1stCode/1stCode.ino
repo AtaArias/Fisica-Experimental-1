@@ -30,6 +30,7 @@ void loop() {
 
   /* Variable de temp en celcius */
   temp = sensors.getTempCByIndex(0);
+  int  h = hour(), m = minute(), s = second();
 
   /* LOPP Imprimir */
   Serial.print(hour(), DEC);
@@ -38,8 +39,7 @@ void loop() {
   Serial.print(" ; ");
   Serial.print(second(), DEC);
   Serial.print(" ; ");
-  Serial.print(temp);
-  Serial.println("°");
+  Serial.println(temp);
 
   /* Demora hasta la siguiente medida */
   delay(1000);
