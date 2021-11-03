@@ -29,7 +29,10 @@ lines(x = ves$t, y = vesAm + (ves$T[1] - vesAm)* exp(r.m * ves$t), col = "red",
        pch = 20, lwd = 3)
 
 
-plot(ves$t, log((ves$T-vesAm)/(ves$T[1]-vesAm)) / ves$t)
+plot(ves$t, log((ves$T-vesAm)/(ves$T[1]-vesAm)))
 r <- log((ves$T-vesAm)/(ves$T[1]-vesAm)) / ves$t
 r <- r[-1]
+aju.rv <- lm(log((ves$T-vesAm)/(ves$T[1]-vesAm)) ~ ves$t)
+aju.rv
 r.m <- mean(r)
+
