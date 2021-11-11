@@ -22,7 +22,6 @@ t <- mean(tiempos)
 d.t <- sd(tiempos) / sqrt(length(tiempos))
 
 Vi <- (-h_0 / t) + (g.Raga * t / 2)
-Vi
 
 #### alcance
 #vel bauti
