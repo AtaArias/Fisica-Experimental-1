@@ -65,11 +65,10 @@ Vi <- (-h_0 / t) + (g.Raga * t / 2)
 
 d.Vi = d.h_0 / t + abs(h_0 / t^2 + g.Raga / 2) * d.t
 
-
 d.hang <- 0.005
 h_ang <- 0.215
 alpha <- 40;
-d.alpha <- pi / 180
+d.alpha <- (pi / 180 )/ 2
 alpha <- alpha * pi / 180
 
 Vy <- sin(alpha) * Vi
@@ -82,10 +81,9 @@ d.Vx <- Vy * d.alpha + cos(alpha) * d.Vi
 t_alcance <- (-Vy - sqrt( Vy^2 + 2 *h_ang * g.Raga) ) / -g.Raga
 
 #d.t_a = abs((-1 - Vy/sqrt(Vy^2 + 2 h g)) / -g)*D.Vy + abs( 1/sqrt(Vy^2 + 2 h g)) * D.h_ang
-d.ta <- abs((-1-Vy/sqrt(Vy^2+2 * h_ang * g.Raga))/g.Raga) * d.Vy + abs(1 /sqrt(Vy^2 + 2 * h_ang * g.Raga)) * d.hang
+d.ta <- abs(1/g.Raga *( -1-(Vy/sqrt(Vy^2+2 * h_ang * g.Raga)))) * d.Vy + (1 /sqrt(Vy^2 + 2 * h_ang * g.Raga)) * d.hang
 
 alcance <- Vx * t_alcance
 
 #d.alcance = d.Vx * t_alcance + Vx  * d.t_alcance
 d.alcance <- d.Vx * t_alcance + Vx * d.ta
-d.alcance
