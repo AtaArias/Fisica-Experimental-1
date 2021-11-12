@@ -1,10 +1,10 @@
 library(latex2exp)
 
+par(mar = c(5.1, 5.1, 2.1, 2.1))
 setwd(paste(getwd(), "Lab6", sep = "/"))
 
 #1.a) Realice el montaje del péndulo de montaje, y haga las medidas correspondientes para calcular L_t +/- d.Lt
 desviación <- read.csv("ResultsPendulo.csv", header = T, sep = ",")
-head(desviación)
 desviación <- desviación[,c(-1,-2)]
 
 h1 <- 0.645; h3 <- 0.841; d.h <- 0.001
@@ -16,7 +16,8 @@ sem <- stanDev / sqrt(length(desviación))
 
 
 hist(lt - desviación, breaks = nclass.FD(lt - desviación),
-     main = "Distancia de caida", xlab = TeX("$L_E(s)$"), 
+     main = "",
+     xlab = TeX("$L_E(s)$"), 
      cex.main = 2, cex.lab = 1.5)
 abline(v = lt, col = "red", lwd = 3)
 arrows(x0 = lt + d.lT, x1 = lt - d.lT,
@@ -97,12 +98,18 @@ for (i in 1:4){
         d.alcance <- d.Vx * t_alcance + Vx * d.ta
         
         
-        if (i == 1)
+        if (i == 1){
                 plot(row$dist + as.numeric(row[6:9]), pch = 20,
-                     xlab = TeX("$número de medida"), ylab = TeX("$ x(m) $"))
-        else
+                     xlab = TeX("Número de medida"), ylab = TeX("$ x(m) $"), cex.lab = 1.5, cex.axis = 1.5)
+                legend(x = 1, y = row$dist + max(as.numeric(row[6:9])), legend = "Alcance modelo", lty = 1, col = "red",
+                       lwd = 3, bty = "n")
+        }
+        else{
                 plot(row$dist + as.numeric(row[6:10]), pch = 20,
-                     xlab = TeX("número de medida"), ylab = TeX("$ x(m) $"))
+                     xlab = TeX("Número de medida"), ylab = TeX("$ x(m) $"), cex.lab = 1.5, cex.axis = 1.5)
+                legend(x = 1, y = row$dist + max(as.numeric(row[6:10])), legend = "Alcance modelo", lty = 1, col = "red",
+                       lwd = 3, bty = "n")
+        }
         
         abline(h  = alcance, col = "red", lwd = 2)
         k = 10
@@ -112,6 +119,7 @@ for (i in 1:4){
                 bien_formateado <- rbind(bien_formateado, c(alpha ,alcance, d.alcance, row$dist + as.numeric(row[j])) )
         }
 }
+
 colnames(bien_formateado) <- c("ángulo", "dModelo", "d.dist", "exp")
 plot(x = bien_formateado$ángulo * 180 / pi, y =bien_formateado$exp, pch = 20,
      xlab = TeX("$ \\alpha (°) $"), ylab = "x(m)", cex.lab = 1.5, ylim = c(1.5, 5.1))
@@ -119,4 +127,5 @@ points(x = bien_formateado$ángulo * 180 / pi, y = bien_formateado$dModelo, col 
 arrows(x0 = bien_formateado$ángulo * 180 / pi, x1 = bien_formateado$ángulo * 180 / pi,
        y0 = bien_formateado$dModelo + bien_formateado$d.dist, y1 = bien_formateado$dModelo - bien_formateado$d.dist,
        col = "yellow", code = 3, angle = 90, lwd = 1)
-
+legend(x = 0, y = 5, legend = c("experimental", "modelo"), pch = c(20, 16),
+       col = c("black", "blue"), bty = "n")
