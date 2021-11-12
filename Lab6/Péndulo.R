@@ -51,6 +51,9 @@ g.Raga <-  9.79316985
 tiempos <- read.csv("tiempos.csv", header = F)
 tiempos <- tiempos$V1
 
+#datos
+exp <- read.csv("medidasExp.csv", header = T, sep = ";")
+
 # Velocidad de salida en tiro vectical
 h_0 <- 0.195
 d.h_0 <-0.005
@@ -65,25 +68,55 @@ Vi <- (-h_0 / t) + (g.Raga * t / 2)
 
 d.Vi = d.h_0 / t + abs(h_0 / t^2 + g.Raga / 2) * d.t
 
-d.hang <- 0.005
-h_ang <- 0.215
-alpha <- 40;
-d.alpha <- (pi / 180 )/ 2
-alpha <- alpha * pi / 180
 
-Vy <- sin(alpha) * Vi
-Vx <- cos(alpha) * Vi
+bien_formateado <- data.frame(NULL)
 
-#D.vy = cos(a)* Vy * d.a + sin(alpha) * d.Vi
-d.Vy <- Vx * d.alpha + sin(alpha) * d.Vi
-d.Vx <- Vy * d.alpha + cos(alpha) * d.Vi
+for (i in 1:4){
+        row <- exp[i,]
+        d.hang <- row$d.h0
+        h_ang <- row$h0
+        alpha <- row$angulo
+        d.alpha <- (pi / 180 )/ 2
+        alpha <- alpha * pi / 180
+        
+        Vy <- sin(alpha) * Vi
+        Vx <- cos(alpha) * Vi
+        
+        #D.vy = cos(a)* Vy * d.a + sin(alpha) * d.Vi
+        d.Vy <- Vx * d.alpha + sin(alpha) * d.Vi
+        d.Vx <- Vy * d.alpha + cos(alpha) * d.Vi
+        
+        t_alcance <- (-Vy - sqrt( Vy^2 + 2 *h_ang * g.Raga) ) / -g.Raga
+        
+        #d.t_a = abs((-1 - Vy/sqrt(Vy^2 + 2 h g)) / -g)*D.Vy + abs( 1/sqrt(Vy^2 + 2 h g)) * D.h_ang
+        d.ta <- abs(1/g.Raga *( -1-(Vy/sqrt(Vy^2+2 * h_ang * g.Raga)))) * d.Vy + (1 /sqrt(Vy^2 + 2 * h_ang * g.Raga)) * d.hang
+        
+        alcance <- Vx * t_alcance
+        
+        #d.alcance = d.Vx * t_alcance + Vx  * d.t_alcance
+        d.alcance <- d.Vx * t_alcance + Vx * d.ta
+        
+        
+        if (i == 1)
+                plot(row$dist + as.numeric(row[6:9]), pch = 20,
+                     xlab = TeX("$número de medida"), ylab = TeX("$ x(m) $"))
+        else
+                plot(row$dist + as.numeric(row[6:10]), pch = 20,
+                     xlab = TeX("número de medida"), ylab = TeX("$ x(m) $"))
+        
+        abline(h  = alcance, col = "red", lwd = 2)
+        k = 10
+        if (i == 1)
+                k = 9
+        for (j in 6:k){
+                bien_formateado <- rbind(bien_formateado, c(alpha ,alcance, d.alcance, row$dist + as.numeric(row[j])) )
+        }
+}
+colnames(bien_formateado) <- c("ángulo", "dModelo", "d.dist", "exp")
+plot(x = bien_formateado$ángulo * 180 / pi, y =bien_formateado$exp, pch = 20,
+     xlab = TeX("$ \\alpha (°) $"), ylab = "x(m)", cex.lab = 1.5, ylim = c(1.5, 5.1))
+points(x = bien_formateado$ángulo * 180 / pi, y = bien_formateado$dModelo, col = "blue", pch = 16)
+arrows(x0 = bien_formateado$ángulo * 180 / pi, x1 = bien_formateado$ángulo * 180 / pi,
+       y0 = bien_formateado$dModelo + bien_formateado$d.dist, y1 = bien_formateado$dModelo - bien_formateado$d.dist,
+       col = "yellow", code = 3, angle = 90, lwd = 1)
 
-t_alcance <- (-Vy - sqrt( Vy^2 + 2 *h_ang * g.Raga) ) / -g.Raga
-
-#d.t_a = abs((-1 - Vy/sqrt(Vy^2 + 2 h g)) / -g)*D.Vy + abs( 1/sqrt(Vy^2 + 2 h g)) * D.h_ang
-d.ta <- abs(1/g.Raga *( -1-(Vy/sqrt(Vy^2+2 * h_ang * g.Raga)))) * d.Vy + (1 /sqrt(Vy^2 + 2 * h_ang * g.Raga)) * d.hang
-
-alcance <- Vx * t_alcance
-
-#d.alcance = d.Vx * t_alcance + Vx  * d.t_alcance
-d.alcance <- d.Vx * t_alcance + Vx * d.ta
