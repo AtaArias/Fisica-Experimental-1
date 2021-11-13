@@ -36,12 +36,51 @@ for (i in lCasa$Tirada){
 }
 #####
 #
+g_aju_pes <- c()
 for (i in 1:tail(pes$Tirada, n = 1)){
   if (i %in% pes$Tirada){
     datos <- pes[pes$Tirada == i,]
-    plot(datos$t / 1000000, datos$x, main = paste("tirada",i,"\n x vs t"),
+    datos$t <- datos$t / 1000000
+    datos$t2 <- datos$t^2
+    aju <- lm(x ~ t + t2, data = datos)
+    plot(datos$t, datos$x, main = paste("tirada",i,"\n x vs t"),
          xlab = "t(s)", ylab = "x",pch = 20)
+    lines(datos$t, fitted(aju))
+    g <- aju$coefficients[3] * 2
+    aju$coefficients[2]
+    #lines(x = step())
+    #curve()
+    g_aju_pes <- c(g_aju_pes, g)
+    }
   }
 }
 
+g_aju_lCasa<- c()
+for (i in 1:tail(lCasa$Tirada, n = 1)){
+  if (i %in% lCasa$Tirada){
+    datos <- lCasa[lCasa$Tirada == i,]
+    datos$t <- datos$t / 1000000
+    datos$t2 <- datos$t^2
+    aju <- lm(x ~ t + t2, data = datos)
+    plot(datos$t, datos$x, main = paste("tirada",i,"\n x vs t"),
+         xlab = "t(s)", ylab = "x",pch = 20)
+    lines(datos$t, fitted(aju))
+    g <- aju$coefficients[3] * 2
+    aju$coefficients[2]
+    #lines(x = step())
+    #curve()
+    g_aju_lCasa <- c(g_aju_lCasa, g)
+  }
+}
+mean(g_aju_lCasa)
+median(g_aju_lCasa)
+max(g_aju_lCasa)
+min(g_aju_lCasa)
 
+SEM_lCasa <- sd(g_aju_lCasa) / sqrt(length(g_aju_lCasa))
+
+
+SEM_pes <- sd(g_aju_pes) / sqrt(length(g_aju_pes))
+
+mean(g_aju_pes) + SEM_pes
+mean(g_aju_lCasa) - SEM_lCasa
