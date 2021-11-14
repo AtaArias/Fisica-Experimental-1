@@ -78,15 +78,13 @@ for (i in 1:tail(lCasa$Tirada, n = 1)){
 }
 
 head(g_aju_lCasa)
-colnames(g_aju_pes) <- colnames(g_aju_lCasa) <- c("g","d.g")
+colnames(g_aju_pes) <- colnames(g_aju_lCasa) <- c("g","SEM")
 
-sd_lCasa = (g_aju_lCasa$g / g_aju_lCasa$d.g)**2
-SEM_lCasa <- sum(g_aju_lCasa$g / sd_lCasa**2) / sum(1 / sd_lCasa**2)
+g_aju_lCasa$sd <-g_aju_lCasa$SEM * sqrt(12)
+SEM_lCasa <- sum(g_aju_lCasa$g / g_aju_lCasa$sd**2) / sum(1 / g_aju_lCasa$sd**2)
 SEM_lCasa
-### SEM = mean / sq(sd) => sq(sd) = mean / SEM => sd = (mean/SEM)^2
-mean(sd_lCasa)
+### SEM = sd / sq(n) sd = SEM * sq(12)
 mean(g_aju_lCasa$d.g)
-
 SEM_pes <- sum(g_aju_pes$d.g) / sum(g_aju_pes$d.g / g_aju_pes$g)
 SEM_pes
 
