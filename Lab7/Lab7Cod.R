@@ -36,7 +36,7 @@ for (i in lCasa$Tirada){
 }
 #####
 #
-g_aju_pes <- c()
+g_aju_pes <- data.frame(NULL)
 for (i in 1:tail(pes$Tirada, n = 1)){
   if (i %in% pes$Tirada){
     datos <- pes[pes$Tirada == i,]
@@ -50,12 +50,14 @@ for (i in 1:tail(pes$Tirada, n = 1)){
     aju$coefficients[2]
     #lines(x = step())
     #curve()
-    g_aju_pes <- c(g_aju_pes, g)
+    d.g <- summary(aju)$coefficients[3,2] * 2
+    
+    g_aju_pes <- rbind(g_aju_pes, c(g, d.g))
     }
   }
 }
 
-g_aju_lCasa<- c()
+g_aju_lCasa<- data.frame(NULL)
 for (i in 1:tail(lCasa$Tirada, n = 1)){
   if (i %in% lCasa$Tirada){
     datos <- lCasa[lCasa$Tirada == i,]
@@ -69,18 +71,23 @@ for (i in 1:tail(lCasa$Tirada, n = 1)){
     aju$coefficients[2]
     #lines(x = step())
     #curve()
-    g_aju_lCasa <- c(g_aju_lCasa, g)
+    d.g <- summary(aju)$coefficients[3,2] * 2
+    
+    g_aju_lCasa <- rbind(g_aju_lCasa, c(g, d.g))
   }
 }
-mean(g_aju_lCasa)
-median(g_aju_lCasa)
-max(g_aju_lCasa)
-min(g_aju_lCasa)
 
-SEM_lCasa <- sd(g_aju_lCasa) / sqrt(length(g_aju_lCasa))
+head(g_aju_lCasa)
+colnames(g_aju_pes) <- colnames(g_aju_lCasa) <- c("g","d.g")
 
+sd_lCasa = (g_aju_lCasa$g / g_aju_lCasa$d.g)**2
+SEM_lCasa <- sum(g_aju_lCasa$g / sd_lCasa**2) / sum(1 / sd_lCasa**2)
+SEM_lCasa
+### SEM = mean / sq(sd) => sq(sd) = mean / SEM => sd = (mean/SEM)^2
+mean(sd_lCasa)
+mean(g_aju_lCasa$d.g)
 
-SEM_pes <- sd(g_aju_pes) / sqrt(length(g_aju_pes))
+SEM_pes <- sum(g_aju_pes$d.g) / sum(g_aju_pes$d.g / g_aju_pes$g)
+SEM_pes
 
-mean(g_aju_pes) + SEM_pes
-mean(g_aju_lCasa) - SEM_lCasa
+mean(g_aju_lCasa$g)
