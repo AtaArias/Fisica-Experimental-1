@@ -123,21 +123,30 @@ l.AllData <- data.frame(NULL)
 AllData <- rbind(AllData, c("pes", fullData(pes)))
 AllData <- rbind(AllData, c("lCasa", fullData(lCasa)))
 
-l.AllData <- rbind(l.AllData, c("pes", linearFullData(pes)))
+l.AllData <- rbind( l.AllData, c( "pes", linearFullData(pes) ) )
 l.AllData <- rbind(l.AllData, c("lCasa", linearFullData(lCasa)))
 
-colnames(AllData) <- c("data","meanMean", "sd", "SEM")
+colnames(l.AllData)<- colnames(AllData) <- c("data","meanMean", "sd", "SEM")
 
-for (i in 1:4){
-  print(as.numeric(AllData$`mean of means`[i]) + as.numeric(AllData$SEM[i]) * c(1,-1))
+for (i in 1:2){
+  print(as.numeric(l.AllData$`meanMean`[i]) + as.numeric(l.AllData$SEM[i]) * c(1,-1))
 }
 
 # x = 1/2 a t^2
 # x / t = vi + 1/2 a * t
 # pendinte = 1/2 a => a = 2 pendiente
 
-data <- linear.g.ajuste(lCasa)
+table <- pes
 
-head(data)
+linearFullData(pes)
 
-head(linear.g.ajuste(pes))
+meanMean <-  sum(linear_g_data$grv / linear_g_data$sd.g^2) / sum (1 / linear_g_data$sd.g^2)
+meanMean
+
+sd.meanMean <- 1 / sqrt (sum(1 / linear_g_data$sd.g^2))
+sd.meanMean
+
+sem.meanMean <- sd.meanMean / sqrt(nrow(table))
+sem.meanMean
+
+c(meanMean, sd.meanMean, sem.meanMean)
