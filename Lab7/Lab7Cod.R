@@ -38,6 +38,32 @@ g.ajuste <- function(table, dataFrame){
   dataFrame
 }
 
+linear.g.ajuste <- function(table){
+  g <- data.frame(NULL)
+  for (i in 1:tail(table$Tirada, n = 1)){
+    if (i %in% table$Tirada){
+      datos <- table[table$Tirada == i,]
+      datos$t <- datos$t / 1000000
+      aju <- lm(datos$x/datos$t ~ datos$t)
+      
+      grv <- 2 * aju$coefficients[2]
+      v <- aju$coefficients[1]
+      
+      sm <- summary(aju)
+      
+      d.g <- sm$coefficients[2,2]
+      d.v <- sm$coefficients[1,2]
+      
+      g <- rbind(g, c(grv, d.g, v, d.v))
+    }
+  }
+  colnames(g) <- c("grv", "dg", "v", "dv")
+  
+  g$sd.g <- g$dg * sqrt(12)
+  
+  g
+}
+
 # calcula la media de las medias, el sd y el sem
 fullData <- function(table){
   # tabla con los ajuste de g
@@ -49,6 +75,18 @@ fullData <- function(table){
   sd.median <- sqrt(1 / sum(1/g_data$sd**2))
   SEM <- sd.median/sqrt(nrow(g_data))
   c(median, sd.median, SEM)
+}
+
+linearFullData <- function(table){
+  linear_g_data <- linear.g.ajuste(table)
+  
+  meanMean <-  sum(linear_g_data$grv / linear_g_data$sd.g^2) / sum (1 / linear_g_data$sd.g^2)
+  
+  sd.meanMean <- 1 / sqrt (sum(1 / linear_g_data$sd.g^2))
+  
+  sem.meanMean <- sd.meanMean / sqrt(nrow(table))
+  
+  c(meanMean, sd.meanMean, sem.meanMean)
 }
 
 
@@ -79,11 +117,27 @@ for (i in 1:tail(lCasa$Tirada, n = 1)){
 #####
 
 AllData <- data.frame(NULL)
-
-AllData <- rbind(AllData, c("liv", fullData(liv)))
-AllData <- rbind(AllData, c("liv2", fullData(liv2)))
+l.AllData <- data.frame(NULL)
+# AllData <- rbind(AllData, c("liv", fullData(liv)))
+# AllData <- rbind(AllData, c("liv2", fullData(liv2)))
 AllData <- rbind(AllData, c("pes", fullData(pes)))
 AllData <- rbind(AllData, c("lCasa", fullData(lCasa)))
-colnames(AllData) <- c("data","mean of means", "sd", "SEM")
 
-AllData
+l.AllData <- rbind(l.AllData, c("pes", linearFullData(pes)))
+l.AllData <- rbind(l.AllData, c("lCasa", linearFullData(lCasa)))
+
+colnames(AllData) <- c("data","meanMean", "sd", "SEM")
+
+for (i in 1:4){
+  print(as.numeric(AllData$`mean of means`[i]) + as.numeric(AllData$SEM[i]) * c(1,-1))
+}
+
+# x = 1/2 a t^2
+# x / t = vi + 1/2 a * t
+# pendinte = 1/2 a => a = 2 pendiente
+
+data <- linear.g.ajuste(lCasa)
+
+head(data)
+
+head(linear.g.ajuste(pes))
