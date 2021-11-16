@@ -109,10 +109,20 @@ for (i in 1:tail(lCasa$Tirada, n = 1)){
     lCasa[lCasa$Tirada == i,]$t <- lCasa[lCasa$Tirada == i,]$t - lCasa[lCasa$Tirada == i & lCasa$Interrupt == 1,]$t
 }
 #####
-# histogramas de la gravedad
+# histogramas de la gravedad aju cuadrático
 pes.g <- g.ajuste(pes)
 lCasa.g <- g.ajuste(lCasa)
+pes.g <- pes.g[pes.g$g < median(pes.g$g)+1 & pes.g$g > median(pes.g$g)- 1,]
+lCasa.g <- lCasa.g[lCasa.g$g < median(lCasa.g$g)+1 & lCasa.g$g > median(lCasa.g$g)- 1,]
 
-hist(pes.g$g)
 
-hist(lCasa.g$g, breaks = )
+hist_pes <- hist(pes.g$g, nclass.FD(pes.g$g))
+hist_lCasa <- hist(lCasa.g$g, nclass.FD(lCasa.g$g))
+
+# histogramas de la gravedad aju lineal
+
+
+
+plot(hist_lCasa, col = "pink")
+c1 <- rgb(0, 0, 255, alpha =  100, names = "blue50",maxColorValue =  255)
+plot(hist_pes, add= T, col = c1)
