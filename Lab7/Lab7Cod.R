@@ -1,5 +1,6 @@
 setwd(paste(getwd(), "Lab7", sep = "/")) # directory with our stuff
 
+library(ggplot2)
 ##### 
 #funciones
 
@@ -16,22 +17,18 @@ limpieza <- function(dataSet){
   dataSet
 }
 
-g.ajuste <- function(table, dataFrame){
-  for (i in 1:tail(table$Tirada, n = 1)){
-    if (i %in% table$Tirada){
+g.ajuste <- function(table){
+  dataFrame <- data.frame(NULL)
+  for (i in unique(table$Tirada)){
       datos <- table[table$Tirada == i,]
       datos$t <- datos$t / 1000000
       datos$t2 <- datos$t^2
       aju <- lm(x ~ t + t2, data = datos)
-      # plot(datos$t, datos$x, main = paste("tirada",i,"\n x vs t"),
-      #      xlab = "t(s)", ylab = "x",pch = 20)
-      # lines(datos$t, fitted(aju))
       g <- aju$coefficients[3] * 2
       SEM <- summary(aju)$coefficients[3,2] * 2
       sd <- SEM * sqrt(12)
       
       dataFrame <- rbind(dataFrame, c(g, SEM, sd))
-    }
   }
   colnames(dataFrame) <- c("g", "SEM", "sd")
   
@@ -40,8 +37,7 @@ g.ajuste <- function(table, dataFrame){
 
 linear.g.ajuste <- function(table){
   g <- data.frame(NULL)
-  for (i in 1:tail(table$Tirada, n = 1)){
-    if (i %in% table$Tirada){
+  for (i in unique(table$Tirada)){
       datos <- table[table$Tirada == i,]
       datos$t <- datos$t / 1000000
       aju <- lm(datos$x/datos$t ~ datos$t)
@@ -55,11 +51,11 @@ linear.g.ajuste <- function(table){
       d.v <- sm$coefficients[1,2]
       
       g <- rbind(g, c(grv, d.g, v, d.v))
-    }
   }
   colnames(g) <- c("grv", "dg", "v", "dv")
   
   g$sd.g <- g$dg * sqrt(12)
+  g$sd.v <- g$dv * sqrt(12)
   
   g
 }
@@ -79,8 +75,6 @@ fullData <- function(table){
 
 linearFullData <- function(table){
   linear_g_data <- linear.g.ajuste(table)
-  
-  meanMean <-  sum(linear_g_data$grv / linear_g_data$sd.g^2) / sum (1 / linear_g_data$sd.g^2)
   
   sd.meanMean <- 1 / sqrt (sum(1 / linear_g_data$sd.g^2))
   
@@ -115,38 +109,10 @@ for (i in 1:tail(lCasa$Tirada, n = 1)){
     lCasa[lCasa$Tirada == i,]$t <- lCasa[lCasa$Tirada == i,]$t - lCasa[lCasa$Tirada == i & lCasa$Interrupt == 1,]$t
 }
 #####
+# histogramas de la gravedad
+pes.g <- g.ajuste(pes)
+lCasa.g <- g.ajuste(lCasa)
 
-AllData <- data.frame(NULL)
-l.AllData <- data.frame(NULL)
-# AllData <- rbind(AllData, c("liv", fullData(liv)))
-# AllData <- rbind(AllData, c("liv2", fullData(liv2)))
-AllData <- rbind(AllData, c("pes", fullData(pes)))
-AllData <- rbind(AllData, c("lCasa", fullData(lCasa)))
+hist(pes.g$g)
 
-l.AllData <- rbind( l.AllData, c( "pes", linearFullData(pes) ) )
-l.AllData <- rbind(l.AllData, c("lCasa", linearFullData(lCasa)))
-
-colnames(l.AllData)<- colnames(AllData) <- c("data","meanMean", "sd", "SEM")
-
-for (i in 1:2){
-  print(as.numeric(l.AllData$`meanMean`[i]) + as.numeric(l.AllData$SEM[i]) * c(1,-1))
-}
-
-# x = 1/2 a t^2
-# x / t = vi + 1/2 a * t
-# pendinte = 1/2 a => a = 2 pendiente
-
-table <- pes
-
-linearFullData(pes)
-
-meanMean <-  sum(linear_g_data$grv / linear_g_data$sd.g^2) / sum (1 / linear_g_data$sd.g^2)
-meanMean
-
-sd.meanMean <- 1 / sqrt (sum(1 / linear_g_data$sd.g^2))
-sd.meanMean
-
-sem.meanMean <- sd.meanMean / sqrt(nrow(table))
-sem.meanMean
-
-c(meanMean, sd.meanMean, sem.meanMean)
+hist(lCasa.g$g, breaks = )
