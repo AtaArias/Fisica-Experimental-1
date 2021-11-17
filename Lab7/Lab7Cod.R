@@ -128,7 +128,7 @@ hist_lCasa <- hist(lCasa.g$g, nclass.FD(lCasa.g$g))
 
 
 c1 <- rgb(0, 0, 255, alpha =  125, names = "blue50",maxColorValue =  255)
-plot(hist_lCasa, col = "green3", main ="Ajuste cuadrático",
+plot(hist_lCasa, col = "green3", main ="Ajuste cuadrático de g",
      xlab = TeX("$ g \\left[\\frac{m}{s^2}\\right]  $"),
      cex.lab = 1.5, cex.main = 2)
 plot(hist_pes, add= T, col = c1)
