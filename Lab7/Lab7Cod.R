@@ -185,13 +185,13 @@ legend(x = 8.6, y = 30, legend = c("Cebra sin peso", "Cebra con plomada"),
 linear.pes.g <- linear.g.ajuste(pes)
 linear.lCasa.g <- linear.g.ajuste(lCasa)
 
-
 linear.hist_pes <- hist(linear.pes.g$g, nclass.FD(pes.g$g))
 linear.hist_lCasa <- hist(linear.lCasa.g$g, nclass.FD(lCasa.g$g))
 
 # histogramas de la gravedad aju lineal
 c1 <- rgb(0, 0, 255, alpha =  125, names = "blue50",maxColorValue =  255)
-plot(linear.hist_lCasa, col = "green3")
+plot(linear.hist_lCasa, col = "green3", main = "Ajustes lineales de g",
+     xlab = TeX("$ g\\left[\\frac{m}{s^2}\\right] $"), cex.main = 2, cex.lab = 1.5)
 plot(linear.hist_pes, add= T, col = c1)
 
 ### mean casa
