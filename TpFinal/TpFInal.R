@@ -20,7 +20,7 @@ medidas$d.x <- crudo$d.h*2
 plot(x = medidas$m, y = medidas$x2, xlab = "m(kg)", ylab = "x(m)", pch = 20, col = "blue",
      main = "x vs m", cex.main =2, cex.lab = 1.5)
 
-m <- medidas$m; x <- medidas$x2; d.x <- medidas$d.x
+m <- medidas$m; x <- medidas$x2; d.x <- medidas$d.x; d.m <- medidas$d.m
 
 arrows(x0 = m, x1 = m, y1 = x + d.x, y0 = x - d.x,
        code = 3, angle = 0, col = "blue", length = 0)
@@ -38,8 +38,13 @@ legend(x = 0, y = 0.08,
 sm <- summary(aju1)
 d.pen <-  sm$coefficients[2]
 d.ke = (g.Raga/pen1**2)*d.pen
+d.ke2 <- g.Raga * summary(lm(m ~ 0 + x))$coefficients[2]
+ke2 <- g.Raga * lm(m ~ 0 + x)$coefficients[1]
+ke2; ke
+d.ke
+d.ke2
 
-print(paste("k estático es",round(ke,1), "mas menos", round(d.ke,1)))
+Sprint(paste("k estático es",round(ke,1), "mas menoSs", round(d.ke,1)))
 
 #####################
 # 2 pi / tau = sqrt(k / m)
