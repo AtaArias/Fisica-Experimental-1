@@ -11,7 +11,7 @@ rasterImage(img.filtered, 1.2, 1.27, 1.8, 1.73)
 # hist(img.filtered)  
 # NCOL(img.filtered)
 
-img.sat <- (img.filtered < 0.9 & img.filtered > 0.7)
+img.sat <- (img.filtered < 0.95 & img.filtered > 0.7)
 storage.mode(img.sat) <-"numeric"
 
 # hist(img.sat)
@@ -37,8 +37,10 @@ tops <- c()
 bots <- c()
 for (i in 1:length(files)) {
   pic <- readPNG(files[i])
+  
   pic <- as.matrix(pic[,,1])
   org <- pic
+  
   
   #original 0.7
   pic <- (pic > 0.7)
