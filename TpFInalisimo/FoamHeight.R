@@ -78,17 +78,14 @@ for (i in 1:length(files)) {
   rasterImage(pic, 1.2, 1.27, 1.8, 1.73)
   
 }
-plot(tops)
-plot(bots)
+# cual es el error de cada punto?
+plot(y = (bots - tops)/(bots[1] - tops[1]) * 100, x = 1:length(files) * 30)
 
 #exponential fit
-t <- seq(0,240, 30)
+t <- 30 * 1:length(files)
 plot(t, log(bots - tops))
 aju <- lm(log(bots - tops) ~ t)
-
 abline(aju)
-plot(bots)
-plot(bots - tops)
+abline(coefficients(aju) + summary(aju)$coefficients[,2], lty = 3, col = "blue")
+abline(coefficients(aju) - summary(aju)$coefficients[,2], lty = 3, col = "blue")
 
-
-#exponential fit
