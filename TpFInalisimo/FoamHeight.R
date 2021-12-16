@@ -79,6 +79,16 @@ for (i in 1:length(files)) {
   
 }
 plot(tops)
-plot(log(seq(0, 240, 30)),bots-tops)
+plot(bots)
+
+#exponential fit
+t <- seq(0,240, 30)
+plot(t, log(bots - tops))
+aju <- lm(log(bots - tops) ~ t)
+
+abline(aju)
 plot(bots)
 plot(bots - tops)
+
+
+#exponential fit
