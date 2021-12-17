@@ -1,12 +1,14 @@
 library(png)
 
 files <- list.files()
+img <- readJPEG(files[9])
+
 
 img <- readPNG(files[9])
 img.filtered <- as.matrix(img[,,1])
 
 plot(1:2, type = "n")
-rasterImage(img.filtered, 1.2, 1.27, 1.8, 1.73)
+rasterImage(img.filtered, 1, 1, 2, 2)
 # 
 # hist(img.filtered)  
 # NCOL(img.filtered)
@@ -43,7 +45,7 @@ for (i in 1:length(files)) {
   
   
   #original 0.7
-  pic <- (pic > 0.7)
+  pic <- (pic > 0.65)
   storage.mode(pic) <- "numeric"
   
   
