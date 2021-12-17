@@ -1,28 +1,40 @@
 #Análisis de quilmes
-
+secs <- function(name){
+  ending <- unlist(strsplit(name, "_"))[3]
+  times <- gsub(".jpg", "", ending)
+  times <- as.integer(times)
+  seconds <- times %% 100
+  minutes <- (times %% 10000 - seconds) / 100
+  hours <- (times - minutes * 100 - seconds) / 10000
+  t <- seconds + minutes * 60 + hours * 3600
+  
+  t
+}
 #librerías
 # install.packages("jpeg")
 library(jpeg)
 
 files <- list.files()
-
+files <- head(files, -1 )
 tops <- c()
 bots <- c()
 
 for (i in 1:length(files)) {
   pic <- readJPEG(files[i])
   pic <- as.matrix(pic[,,1])
-  org <- pic
   
+  # plot(1:2, type= "n", main = i)
+  # rasterImage(pic, 1, 1, 2, 2)
+  # 
   pic <- pic[0:(0.9*nrow(pic)),]
-  pic <- pic[, (0.42 * ncol(pic)):(0.47 * ncol(pic))]
-  # pic <- t(pic)
-  # pic <- pic[1: (nrow(pic)/2 + 220),]
+  pic <- pic[, (0.45 * ncol(pic)):(0.47 * ncol(pic))]
+ 
+  
+  # pic <- t(pic) #rotar si es necesario
   # pic <- pic[,(0.35 * ncol(pic)):(  0.40 * ncol(pic))]
   
-  # 
   #original 0.7
-  pic <- (pic < 0.5)
+  pic <- (pic > 0.6)
   storage.mode(pic) <- "numeric"
   
   
@@ -38,8 +50,14 @@ for (i in 1:length(files)) {
     }
     indices <- which(list) # indices de los bordes
     if (length(indices) > 1){
-      h_top <- c(h_top, tail(indices,2)[1])
-      h_bot <- c(h_bot, tail(indices,1))
+      bajo <- tail(indices,1)
+      alto <- tail(indices,2)[1]
+      while((bajo - alto) < (length(files)-i) * 10){
+        indices <- indices[-length(indices)]
+        alto <- tail(indices,2)[1]
+      }
+      h_top <- c(h_top, alto)
+      h_bot <- c(h_bot, bajo)
     }
     mean(columna)
   }
@@ -48,23 +66,18 @@ for (i in 1:length(files)) {
   tops <- c(tops, median(h_top))
   bots <- c(bots, median(h_bot))
   
-  pic[tops[i]:(tops[i]+10),] <- "blue"
-  pic[bots[i]:(bots[i]+10),] <- "red"
-  
-  # org[tops[i]:(tops[i]+10),] <- "blue"
-  # org[bots[i]:(bots[i]+10),] <- "red"
-  # 
-  
-  # plot(1:2, type = "n")
-  # rasterImage(org, 1, 1, 2, 2)
-  # 
-  plot(1:2, type= "n")
+  plot(1:2, type= "n", main = i)
   rasterImage(pic, 1, 1, 2, 2)
+  abline(h = 2-(median(h_top) / nrow(pic)), col = "red", lwd = 5, lty = 3)
+  abline(h = 2-(median(h_bot) / nrow(pic)), col = "blue", lwd = 5, lty = 3)
   
+  print(paste(round(i/length(files),3) * 100, "% completado"))
 }
-files[1]
-x <- strsplit(files[1], "_")
-a <- unlist(x)
-a[3]
-plot(y = bots - tops, x  = 30 * 1:length(files))
 
+t <- c()
+for (title in files){
+  t <- c(t, secs(title))
+}
+t <- t - t[1]
+
+plot(x = t, y = log((bots - tops)/(bots[1]-tops[1]) * 100))
