@@ -19,7 +19,7 @@ secs <- function(name){
 
 #librerías
 library(jpeg)
-install.li
+library(paletteer)
 
 #Análisis de quilmes
 root <- "/home/ata_arias/Desktop/Experimental1/TpFinal/Quilmes"
@@ -29,6 +29,8 @@ temps <- list.files()
 
 t.list <- list() 
 total.list <- list()
+
+sens <- c(0.47, 0.65, 0.6, 0.6, 0.55, 0.6, 0., 0.6, 0.55, 0.55)
 
 for (temp in temps)
 {
@@ -44,33 +46,30 @@ for (temp in temps)
     pic <- as.matrix(pic[,,1])
     
     pic <- pic[,(0.3*ncol(pic)):(0.6*ncol(pic))] # cols
-    pic <- pic[(0.1*nrow(pic)):(0.9*nrow(pic)),] # rows
+    if (Tnum == 7){
+      pic <- pic[(0.17*nrow(pic)):(0.9*nrow(pic)),]} # rows
+    else{
+      pic <- pic[(0.1*nrow(pic)):(0.9*nrow(pic)),]}
     
+    hist(pic)
     #original 0.7
-    pic <- (pic > 0.55)
+    pic <- (pic > sens[Tnum])
     storage.mode(pic) <- "numeric"
     
-    # plot(1:2, type= "n", main = i)
-    # rasterImage(pic, 1, 1, 2, 2)
-    
-    dens <- c()
-    for (j in 1:(nrow(pic))){
-      dens <- c(dens, mean(pic[j,]))
-    }
-    dens <- dens[dens > mean(dens)]    
-    dens <- dens[abs(diff(dens)) < 0.005]
-    dens <- dens[abs(diff(dens)) < 0.005]
+    plot(1:2, type= "n", main = i)
+    rasterImage(pic, 1, 1, 2, 2)
 
-    foam <- length( abs(diff(dens)) < 0.0025)
+    dens <- rowMeans(pic) 
+      
+    dens <- dens[dens > mean(dens)] # me saco los valores muy bajos
+    dens <- dens[abs(diff(dens)) < 0.005] # me saco los que están en subida
+    dens <- dens[dens > max(dens) -0.15]
+    
+    foam <- length( abs(diff(dens)) < 0.003)
       
     foams <- c(foams, foam)
 
-    abline(h = max(dens) - 0.1, col = "blue", lwd = 2, lty = 3)
-    abline(h = max(dens), col = "blue", lwd = 4, lty = 3)
-    
-    plot(diff(dens))
-    
-    print(paste(round(i/length(files),3) * 100, "% completado"))
+    print(paste(round(i/length(files),2) * 100, "% completado"))
   }
   
   t <- c()
@@ -84,10 +83,10 @@ for (temp in temps)
   t.list[[Tnum]] <- t
   total.list[[Tnum]] <- total
   
-  plot(x = t, y =total, pch = 20)
+  plot(x = t, y =total, pch = 20, main = Tnum)
 }
 
-plot(t.list[[1]], total.list[[1]], pch = 8, col = colores[1], ylim = c(0, 2))
+plot(t.list[[1]], total.list[[1]], pch = 8, col = colores[1], ylim = c(0, 1))
 for (n in 2:length(temps)){
   # points(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
   lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
