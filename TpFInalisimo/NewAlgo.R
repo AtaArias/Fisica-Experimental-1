@@ -26,6 +26,8 @@ temps <- list.files()
 
 sens <- c(0.5, 0.55, 0.6, 0.6, 0.5, 0.58, 0.6, 0.53, 0.5)
 t.list <- list()
+bot.list <- list()
+top.list <- list()
 total.list <- list()
 
 for (i in 1:length(temps)){
@@ -42,6 +44,8 @@ for (i in 1:length(temps)){
   bots <- c()
   for (k in 1:length(list.files())) {
     file <- list.files()[k] 
+    
+    print(file)
     
     img <-file
     img <- readJPEG(img)
@@ -105,6 +109,8 @@ for (i in 1:length(temps)){
   t <- t - t[1]
   t.list[[i]] <- t
   total.list[[i]] <- h/h[1]
+  bot.list[[i]] <- bots
+  top.list[[i]] <- tops
   
   plot(t, tops, main = paste(temp, "top"))
   plot(t, bots, main = paste(temp, "bot"))
@@ -115,7 +121,13 @@ for (i in 1:length(temps)){
 
 plot(t.list[[1]], total.list[[1]], pch = 8, col = colores[1], ylim = c(0, 1))
 for (n in 2:length(temps)){
-  # points(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
-  lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
+  points(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
+  # lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
+}
+
+plot(t.list[[1]], bot.list[[1]], pch = 8, col = colores[1], ylim = c(700, 1200))
+for (n in 7:9){
+  points(x = t.list[[n]], bot.list[[n]], pch =  7 + n, col = colores[n])
+  # lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
 }
 
