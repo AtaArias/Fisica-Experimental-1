@@ -13,6 +13,10 @@ secs <- function(name){
 
 #librerías
 library(jpeg)
+library(paletteer)
+
+colores <- paletteer_d("jcolors::pal12")
+
 
 #Análisis de quilmes
 root <- "/home/ata_arias/Desktop/Experimental1/TpFinal/Quilmes"
