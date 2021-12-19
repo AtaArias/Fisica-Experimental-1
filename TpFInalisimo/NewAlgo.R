@@ -24,9 +24,10 @@ setwd(root)
 
 temps <- list.files()
 
-sens <- c(0.5, 0.55, 0.6, 0.6, 0.5, 0.6, 0.6, 0.53, 0.53)
+sens <- c(0.5, 0.55, 0.6, 0.6, 0.5, 0.58, 0.6, 0.53, 0.5)
 t.list <- list()
 total.list <- list()
+
 for (i in 1:length(temps)){
   temp <- temps[i]
   
@@ -37,29 +38,29 @@ for (i in 1:length(temps)){
   # Saco las columnas que suman menos de 10
   h <- c()
   t <- c()
-  
-  for (file in list.files()) {
+  tops <- c()
+  bots <- c()
+  for (k in 1:length(list.files())) {
+    file <- list.files()[k] 
+    
     img <-file
     img <- readJPEG(img)
     img <- as.matrix(img[,,1])
     
-    # plot(1:2, type= "n")
-    # rasterImage(img, 1, 1, 2, 2)
-    
-    img <- (img > sens[i])
+    if ((k == 9 || k == 10) && i  == 9)
+      img <- (img > 0.7)
+    else
+      img <- (img > sens[i])
     storage.mode(img) <- "numeric"
     
-    # plot(1:2, type= "n")
-    # rasterImage(img, 1, 1, 2, 2)
+    img <- img[,colSums(img) > 50]
     
-    img <- img[,colSums(img) > 10]
-    if (temp == temps[9])
-      img <- img[, (0.1 * ncol(img)):(0.3*ncol(img))]
+    if (i == 9)
+      img <- img[, (0.4 * ncol(img)):(0.6*ncol(img))]
+    else if (i == 3)
+      img <- img[, (0.1 * ncol(img)):(0.3 *ncol(img))]
     else
       img <- img[, (0.4 * ncol(img)):(0.75*ncol(img))]
-    
-    # plot(1:2, type= "n")
-    # rasterImage(img, 1, 1, 2, 2)
     
     imgEdg <- diff(img)
     h_top <- c()
@@ -93,6 +94,9 @@ for (i in 1:length(temps)){
     # abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
 
     h <- c(h, median(grosor, na.rm = T))
+    tops <- c(tops, median(h_top, na.rm = T))
+    bots <- c(bots, median(h_bot, na.rm = T))
+    
     
     t <- c(t, secs(file))
     
@@ -100,9 +104,12 @@ for (i in 1:length(temps)){
   
   t <- t - t[1]
   t.list[[i]] <- t
-  total.list[[i]] <- h
+  total.list[[i]] <- h/h[1]
   
-  plot(t, h/h[1] * 100, main = temp)
+  plot(t, tops, main = paste(temp, "top"))
+  plot(t, bots, main = paste(temp, "bot"))
+  
+  # plot(t, h/h[1] * 100, main = temp)
 }
 
 
