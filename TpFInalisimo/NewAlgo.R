@@ -127,22 +127,29 @@ for (i in 1:length(t.list)){
 
 
 plot(t.list[[1]], total.list[[1]])
-aju <- lm(log(total.list[[1]]) ~ t.list[[1]])
-points(x = t.list[[1]], y = exp(aju$coefficients[2] * t.list[[1]]))
 
-
-pend <- diff(log(h.list[[1]]/h.list[[1]][1] * 100)) / (t.list[[1]][-1] - head(t.list[[1]], -1))
-abline(a = log(100), b = mean(pend))
-
-plot(pend)
-mean(pend)
-
-for (j in 1:length(t.list)){
-  pend <- diff(log(h.list[[j]][5:10]/h.list[[j]][1] * 100)) / (t.list[[j]][5:10] - t.list[[j]][4:9])
-  print(mean(sort(pend)[(1/3 * length(pend)):(2/3 * length(pend))]))
-  print(temps[j])
+largo <- length(total.list[[1]])
+total <- total.list[[1]]
+times <- t.list[[1]]
+lim <- 1
+for (i in 1:lim){
+  y <- total[((i-1)/lim * largo):(i / lim * largo)]
+  x <- times[((i-1)/lim * largo):(i / lim * largo)]
+  aju <- lm(log(y) ~ x - 1)
+  d.r <- summary(aju)$coefficients[2]
+  r <- -aju$coefficients[1]
+  # print(aju$coefficients[1])
+  # # plot(x, log(y))
+  # abline(aju)
+  # plot(x, y)
+  
+  d.y = exp(-r * x)*(x * d.r + r)
+  lines(x = x, y = exp(-r * x), col = "blue", lwd = 2)
+  lines(x = x, y = exp(-r * x) + d.y, col = "blue", lty = 3)
+  lines(x = x, y = exp(-r * x) - d.y, col = "blue", lty = 3)
 }
 
-for (j in 1:length(t.list)){
-  plot(t.list[[j]], log(total.list[[j]]))
+erres <- c()
+for (i in 1:length(total.list)){
+  aju(log(total.list[[i]]), )
 }
