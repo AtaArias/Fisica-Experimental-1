@@ -11,7 +11,7 @@ secs <- function(name){
   t
 }
 
-#librerías
+0#librerías
 library(jpeg)
 library(paletteer)
 
@@ -44,9 +44,7 @@ for (i in 1:length(temps)){
   bots <- c()
   for (k in 1:length(list.files())) {
     file <- list.files()[k] 
-    
-    print(file)
-    
+
     img <-file
     img <- readJPEG(img)
     img <- as.matrix(img[,,1])
@@ -118,16 +116,33 @@ for (i in 1:length(temps)){
   # plot(t, h/h[1] * 100, main = temp)
 }
 
+h.list <- list()
 
-plot(t.list[[1]], total.list[[1]], pch = 8, col = colores[1], ylim = c(0, 1))
-for (n in 2:length(temps)){
-  points(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
-  # lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
+for (i in 1:length(t.list)){
+  top.list[[i]] <- abs(top.list[[i]] - bot.list[[i]][1])
+  bot.list[[i]] <- abs(bot.list[[i]] - bot.list[[i]][1])
+  
+  h.list[[i]] <- top.list[[i]] - bot.list[[i]]  
 }
 
-plot(t.list[[1]], bot.list[[1]], pch = 8, col = colores[1], ylim = c(700, 1200))
-for (n in 7:9){
-  points(x = t.list[[n]], bot.list[[n]], pch =  7 + n, col = colores[n])
-  # lines(x = t.list[[n]], total.list[[n]], pch =  7 + n, col = colores[n])
+
+plot(t.list[[1]], total.list[[1]])
+aju <- lm(log(total.list[[1]]) ~ t.list[[1]])
+points(x = t.list[[1]], y = exp(aju$coefficients[2] * t.list[[1]]))
+
+
+pend <- diff(log(h.list[[1]]/h.list[[1]][1] * 100)) / (t.list[[1]][-1] - head(t.list[[1]], -1))
+abline(a = log(100), b = mean(pend))
+
+plot(pend)
+mean(pend)
+
+for (j in 1:length(t.list)){
+  pend <- diff(log(h.list[[j]][5:10]/h.list[[j]][1] * 100)) / (t.list[[j]][5:10] - t.list[[j]][4:9])
+  print(mean(sort(pend)[(1/3 * length(pend)):(2/3 * length(pend))]))
+  print(temps[j])
 }
 
+for (j in 1:length(t.list)){
+  plot(t.list[[j]], log(total.list[[j]]))
+}
