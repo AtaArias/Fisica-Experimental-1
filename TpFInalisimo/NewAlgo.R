@@ -11,7 +11,7 @@ secs <- function(name){
   t
 }
 
-0#librerías
+#librerías
 library(jpeg)
 library(paletteer)
 
@@ -89,13 +89,11 @@ for (i in 1:length(temps)){
       h_bot <- c(h_bot, debajo[index])
     }
     
-    png(paste("Rplot",temp,"_", k,".png", sep =""))
-    
-    plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
-    rasterImage(img, 1, 1, 2, 2)
-
-    abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
-    abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
+    # plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
+    # rasterImage(img, 1, 1, 2, 2)
+    # 
+    # abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
+    # abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
 
     h <- c(h, median(grosor, na.rm = T))
     tops <- c(tops, median(h_top, na.rm = T))
