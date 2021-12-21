@@ -44,8 +44,11 @@ for (i in 1:length(temps)){
   bots <- c()
   for (k in 1:length(list.files())) {
     file <- list.files()[k] 
+    
+    print(k)
 
     img <-file
+    img <- normalizePath(img)
     img <- readJPEG(img)
     img <- as.matrix(img[,,1])
     
@@ -89,11 +92,11 @@ for (i in 1:length(temps)){
       h_bot <- c(h_bot, debajo[index])
     }
     
-    # plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
-    # rasterImage(img, 1, 1, 2, 2)
-    # 
-    # abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
-    # abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
+    plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
+    rasterImage(img, 1, 1, 2, 2)
+
+    abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
+    abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
 
     h <- c(h, median(grosor, na.rm = T))
     tops <- c(tops, median(h_top, na.rm = T))
@@ -125,38 +128,26 @@ for (i in 1:length(t.list)){
   h.list[[i]] <- top.list[[i]] - bot.list[[i]]  
 }
 
+# for (i in 1:length(total.list)){
+#   plot(t.list[[i]], log(total.list[[i]]), main = temps[i])
+#   aju <- lm(log(total.list[[i]]) ~ t.list[[i]] - 1)
+#   abline(aju)
+#   
+#   # plot(t.list[[i]], total.list[[i]], main = paste("h/h_0 vs t", temps[i], "°C"))
+#   # lines(t.list[[i]], exp(aju$coefficients[1] * t.list[[i]]))
+# }
 
-plot(t.list[[1]], total.list[[1]])
-
-largo <- length(total.list[[1]])
-total <- total.list[[1]]
-times <- t.list[[1]]
-lim <- 1
-for (i in 1:lim){
-  y <- total[((i-1)/lim * largo):(i / lim * largo)]
-  x <- times[((i-1)/lim * largo):(i / lim * largo)]
-  aju <- lm(log(y) ~ x - 1)
-  d.r <- summary(aju)$coefficients[2]
-  r <- -aju$coefficients[1]
-  # print(aju$coefficients[1])
-  # # plot(x, log(y))
-  # abline(aju)
-  # plot(x, y)
-  
-  d.y = exp(-r * x)*(x * d.r + r)
-  lines(x = x, y = exp(-r * x), col = "blue", lwd = 2)
-  lines(x = x, y = exp(-r * x) + d.y, col = "blue", lty = 3)
-  lines(x = x, y = exp(-r * x) - d.y, col = "blue", lty = 3)
-}
-
-erres <- c()
-rsq <- c()
 for (i in 1:length(total.list)){
-  aju <- lm(log(total.list[[i]]) ~ t.list[[i]] - 1)
-  erres <- c(erres, - aju$coefficients[1])
-  summ <- summary(aju)
-  rsq <- c(rsq, summ$r.squared)
+  plot(t.list[[i]], bot.list[[i]], main = paste(temps[[i]], "°C", "h_bot"))
 }
 
-plot(rsq, temps)
-plot(temps[rsq > 0.985], erres[rsq > 0.985])
+plot(t.list[[i]], total.list[[i]], main = paste("h/h_0 vs t", temps[i], "°C"))
+
+## data set
+tidy <- data.frame(NULL)
+for (i in 1:length(total.list)){
+  mini <- data.frame(t = t.list[[i]], h_h0 = total.list[[i]], T = temps[[i]], n = i)
+  tidy <- rbind(tidy, mini)
+}
+
+plot(tidy$t, tidy$h_h0, col = colores[tidy$n], pch = 5 + tidy$n)
