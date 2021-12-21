@@ -50,6 +50,7 @@ for (i in 1:length(temps)){
     img <-file
     img <- normalizePath(img)
     img <- readJPEG(img)
+    org <- img
     img <- as.matrix(img[,,1])
     
     if ((k == 9 || k == 10) && i  == 9)
@@ -93,11 +94,12 @@ for (i in 1:length(temps)){
     }
     
     plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
-    rasterImage(img, 1, 1, 2, 2)
+    rasterImage(org, 1, 1, 2, 2)
 
     abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
     abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
 
+    
     h <- c(h, median(grosor, na.rm = T))
     tops <- c(tops, median(h_top, na.rm = T))
     bots <- c(bots, median(h_bot, na.rm = T))
@@ -106,7 +108,6 @@ for (i in 1:length(temps)){
     t <- c(t, secs(file))
     
   }
-  
   t <- t - t[1]
   t.list[[i]] <- t
   total.list[[i]] <- h/h[1]
@@ -119,7 +120,7 @@ for (i in 1:length(temps)){
   # plot(t, h/h[1] * 100, main = temp)
 }
 
-h.list <- list()
+dh.list <- list()
 
 for (i in 1:length(t.list)){
   top.list[[i]] <- abs(top.list[[i]] - bot.list[[i]][1])

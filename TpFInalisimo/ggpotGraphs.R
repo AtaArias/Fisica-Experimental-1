@@ -20,3 +20,7 @@ ylab(TeX(r"($ \\frac{h}{h_0}(adimensional) \[ log \] $)"))
 
 show(gtutti)
 
+for (i in 1:max(tidy$n)){
+  plot()
+}
+
