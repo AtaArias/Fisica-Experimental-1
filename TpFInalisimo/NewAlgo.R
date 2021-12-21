@@ -89,11 +89,13 @@ for (i in 1:length(temps)){
       h_bot <- c(h_bot, debajo[index])
     }
     
-    # plot(1:2, type= "n", main = file)
-    # rasterImage(img, 1, 1, 2, 2)
-    # 
-    # abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
-    # abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
+    png(paste("Rplot",temp,"_", k,".png", sep =""))
+    
+    plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
+    rasterImage(img, 1, 1, 2, 2)
+
+    abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
+    abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
 
     h <- c(h, median(grosor, na.rm = T))
     tops <- c(tops, median(h_top, na.rm = T))
@@ -110,8 +112,8 @@ for (i in 1:length(temps)){
   bot.list[[i]] <- bots
   top.list[[i]] <- tops
   
-  plot(t, tops, main = paste(temp, "top"))
-  plot(t, bots, main = paste(temp, "bot"))
+  # plot(t, tops, main = paste(temp, "top"))
+  # plot(t, bots, main = paste(temp, "bot"))
   
   # plot(t, h/h[1] * 100, main = temp)
 }
@@ -150,6 +152,13 @@ for (i in 1:lim){
 }
 
 erres <- c()
+rsq <- c()
 for (i in 1:length(total.list)){
-  aju(log(total.list[[i]]), )
+  aju <- lm(log(total.list[[i]]) ~ t.list[[i]] - 1)
+  erres <- c(erres, - aju$coefficients[1])
+  summ <- summary(aju)
+  rsq <- c(rsq, summ$r.squared)
 }
+
+plot(rsq, temps)
+plot(temps[rsq > 0.985], erres[rsq > 0.985])
