@@ -44,13 +44,10 @@ for (i in 1:length(temps)){
   bots <- c()
   for (k in 1:length(list.files())) {
     file <- list.files()[k] 
-    
-    print(k)
 
     img <-file
     img <- normalizePath(img)
     img <- readJPEG(img)
-    org <- img
     img <- as.matrix(img[,,1])
     
     if ((k == 9 || k == 10) && i  == 9)
@@ -58,6 +55,8 @@ for (i in 1:length(temps)){
     else
       img <- (img > sens[i])
     storage.mode(img) <- "numeric"
+    
+    org <- img
     
     img <- img[,colSums(img) > 50]
     
@@ -93,12 +92,18 @@ for (i in 1:length(temps)){
       h_bot <- c(h_bot, debajo[index])
     }
     
-    plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
-    rasterImage(org, 1, 1, 2, 2)
-
-    abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
-    abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
-
+    # setwd("~/Desktop/Experimental1/TpFinal/gif_sat")
+    # png(paste("temp", temp, "tirada", k, ".png", sep = "_"))
+    # 
+    # plot(1:2, type= "n", main = paste(temp, "°C", sep =""))
+    # rasterImage(org, 1, 1, 2, 2)
+    # 
+    # abline(h = 2-(median(h_top) / nrow(img)), col = "red", lwd = 5, lty = 3)
+    # abline(h = 2-(median(h_bot, na.rm = T) / nrow(img)), col = "blue", lwd = 5, lty = 3)
+    # 
+    # dev.off()
+    # setwd(paste(root, temp, sep = "/"))
+    
     
     h <- c(h, median(grosor, na.rm = T))
     tops <- c(tops, median(h_top, na.rm = T))
@@ -129,14 +134,19 @@ for (i in 1:length(t.list)){
   h.list[[i]] <- top.list[[i]] - bot.list[[i]]  
 }
 
-# for (i in 1:length(total.list)){
-#   plot(t.list[[i]], log(total.list[[i]]), main = temps[i])
-#   aju <- lm(log(total.list[[i]]) ~ t.list[[i]] - 1)
-#   abline(aju)
-#   
-#   # plot(t.list[[i]], total.list[[i]], main = paste("h/h_0 vs t", temps[i], "°C"))
-#   # lines(t.list[[i]], exp(aju$coefficients[1] * t.list[[i]]))
-# }
+for (i in 1:length(total.list)){
+  plot(t.list[[i]], log(total.list[[i]]), main = temps[i])
+  aju <- lm(log(total.list[[i]]) ~ t.list[[i]])
+  abline(aju)
+  
+  r <- -aju$coefficients[2]
+  d.r <- summary(aju)$coefficients[2,2]
+  
+  plot(t.list[[i]], total.list[[i]], main = paste("h/h_0 vs t", temps[i], "°C"))
+  lines(t.list[[i]], exp(-r * t.list[[i]]))
+  lines(t.list[[i]], exp(-r * t.list[[i]]) + exp(-r * t.list[[i]]) * (t.list[[i]] * d.r + r))
+  lines(t.list[[i]], exp(-r * t.list[[i]]) - exp(-r * t.list[[i]]) * (t.list[[i]] * d.r + r))  
+}
 
 for (i in 1:length(total.list)){
   plot(t.list[[i]], bot.list[[i]], main = paste(temps[[i]], "°C", "h_bot"))
@@ -152,3 +162,10 @@ for (i in 1:length(total.list)){
 }
 
 plot(tidy$t, tidy$h_h0, col = colores[tidy$n], pch = 5 + tidy$n)
+
+# for (i in 1:9){
+#   r <- - log(total.list[[i]]) / t.list[[i]]
+#   plot(t.list[[i]], r, main = i)
+#   print(mean(r, na.rm = T))
+#   print(sd(r, na.rm = T))
+# }
